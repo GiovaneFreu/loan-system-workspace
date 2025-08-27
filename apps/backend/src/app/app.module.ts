@@ -1,10 +1,20 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { DatabaseModule } from './database/datasource.module';
+import { ClientsModule } from './modules/clients/clients.module';
+import { LoansModule } from './modules/loans/loans.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ClientsModule,
+    DatabaseModule,
+    LoansModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'frontend'),
+    }),
+  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
