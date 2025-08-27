@@ -1,0 +1,56 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: rg-loan-system-staging
+  ACR_NAME: loansystemacr
+  CONTAINER_APP_NAME: loan-system-app-staging
+  CONTAINER_APP_ENV: loan-system-env-staging
+
+jobs:
+  deploy:
+    name: Deploy to Azure Staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://loan-system-staging.azurecontainerapps.io
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_STAGING }}
+
+      - name: Build and push to ACR
+        run: |
+          az acr build \
+            --registry ${{ env.ACR_NAME }} \
+            --image loan-system:${{ github.sha }} \
+            --image loan-system:staging-latest \
+            --file infrastructure/docker/Dockerfile.prod \
+            .
+
+      - name: Deploy to Container Apps
+        run: |
+          az containerapp update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.ACR_NAME }}.azurecr.io/loan-system:${{ github.sha }} \
+            --set-env-vars \
+              NODE_ENV=staging \
+              DATABASE_HOST=${{ secrets.DB_HOST_STAGING }} \
+              DATABASE_PORT=${{ secrets.DB_PORT_STAGING }} \
+              DATABASE_USER=${{ secrets.DB_USER_STAGING }} \
+              DATABASE_PASSWORD=${{ secrets.DB_PASSWORD_STAGING }} \
+              DATABASE_NAME=${{ secrets.DB_NAME_STAGING }}
+
+      - name: Verify deployment
+        run: |
+          sleep 30
+          curl -f https://loan-system-staging.azurecontainerapps.io/health || exit 1

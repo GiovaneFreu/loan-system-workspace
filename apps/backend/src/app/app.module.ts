@@ -4,9 +4,11 @@ import { join } from 'path';
 import { DatabaseModule } from './database/datasource.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { LoansModule } from './modules/loans/loans.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
+    HealthModule,
     ClientsModule,
     DatabaseModule,
     LoansModule,
