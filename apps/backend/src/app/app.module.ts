@@ -11,7 +11,7 @@ import { LoansModule } from './modules/loans/loans.module';
     DatabaseModule,
     LoansModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'frontend'),
+      rootPath: join(process.cwd(), 'dist', 'apps', 'frontend', 'browser'),
     }),
   ],
   controllers: [],
