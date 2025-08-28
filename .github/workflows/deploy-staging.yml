@@ -11,7 +11,44 @@ env:
   CONTAINER_APP_NAME: loan-system-app-staging
 
 jobs:
+  validate:
+    name: Validate before Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Test build with staging environment
+        env:
+          NODE_ENV: staging
+          DATABASE_HOST: test
+          DATABASE_PORT: 5432
+          DATABASE_USER: test
+          DATABASE_PASSWORD: test
+          DATABASE_NAME: test
+        run: |
+          npx nx build backend --configuration=production
+          echo "✅ Build successful with NODE_ENV=staging"
+      
+      - name: Test Docker build
+        run: |
+          docker build \
+            -f infrastructure/docker/Dockerfile.prod \
+            -t loan-system:staging-test \
+            .
+          echo "✅ Docker build successful"
+  
   deploy:
+    needs: validate
     name: Deploy to Azure Staging
     runs-on: ubuntu-latest
     environment:
