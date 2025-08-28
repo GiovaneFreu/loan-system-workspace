@@ -44,3 +44,13 @@ Thumbs.db
 .github/instructions/nx.instructions.md
 
 .angular
+
+# Environment files (keep only .env.example)
+.env
+.env.local
+infrastructure/environments/.env.development
+infrastructure/environments/.env.production
+infrastructure/environments/.env.staging
+infrastructure/environments/.env.docker
+infrastructure/environments/.env.local
+infrastructure/environments/.env.*.local
