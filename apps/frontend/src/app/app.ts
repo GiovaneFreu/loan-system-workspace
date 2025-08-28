@@ -8,6 +8,6 @@ import { CoreModule } from './core/core.module';
     CoreModule,
   ],
   selector: 'app-root',
-  template: `<app-component></app-component>`,
+  template: `<app-component class="bg-red-500"></app-component>`,
 })
 export class App {}

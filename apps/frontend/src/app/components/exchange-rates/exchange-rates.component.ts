@@ -1,6 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, inject } from '@angular/core';
 import { CurrencyType } from '@loan-system-workspace/interfaces';
 
 @Component({
@@ -14,11 +14,11 @@ export class ExchangeRatesComponent implements OnInit {
   exchangeRates: Record<string, number> = {};
   loading = false;
   lastUpdate: Date | null = null;
-  
+
   private http = inject(HttpClient);
 
   ngOnInit() {
-    this.loadExchangeRates();
+    // this.loadExchangeRates();
   }
 
   loadExchangeRates() {
@@ -53,7 +53,7 @@ export class ExchangeRatesComponent implements OnInit {
       [CurrencyType.CNY]: 'Yuan Chinês',
       [CurrencyType.ARS]: 'Peso Argentino'
     };
-    
+
     return names[currency as CurrencyType] || currency;
   }
 
@@ -70,7 +70,7 @@ export class ExchangeRatesComponent implements OnInit {
       [CurrencyType.CNY]: '¥',
       [CurrencyType.ARS]: '$'
     };
-    
+
     return symbols[currency as CurrencyType] || currency;
   }
 
@@ -100,7 +100,7 @@ export class ExchangeRatesComponent implements OnInit {
       [CurrencyType.CNY]: 'up',
       [CurrencyType.ARS]: 'down'
     };
-    
+
     return mockVariations[currency as CurrencyType] || 'neutral';
   }
 
