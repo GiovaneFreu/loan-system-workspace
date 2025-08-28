@@ -1,0 +1,143 @@
+import { Component, EventEmitter, Input, Output, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { ClientInterface } from '@loan-system-workspace/interfaces';
+
+@Component({
+  selector: 'app-client-form',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './client-form.component.html',
+  styleUrl: './client-form.component.css'
+})
+export class ClientFormComponent implements OnInit {
+  @Input() client: ClientInterface | null = null;
+  @Output() submitted = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
+
+  formData = {
+    name: '',
+    birthDate: '',
+    cpf_cnpj: '',
+    monthlyIncome: 0
+  };
+
+  loading = false;
+  errors: any = {};
+  
+  private http = inject(HttpClient);
+
+  ngOnInit() {
+    if (this.client) {
+      this.formData = {
+        name: this.client.name,
+        birthDate: this.formatDateForInput(this.client.birthDate),
+        cpf_cnpj: this.client.cpf_cnpj,
+        monthlyIncome: this.client.monthlyIncome
+      };
+    }
+  }
+
+  get isEditing(): boolean {
+    return this.client !== null;
+  }
+
+  get title(): string {
+    return this.isEditing ? 'Editar Cliente' : 'Novo Cliente';
+  }
+
+  onSubmit() {
+    if (this.validateForm()) {
+      this.loading = true;
+      this.errors = {};
+
+      const clientData = {
+        ...this.formData,
+        birthDate: new Date(this.formData.birthDate).toISOString()
+      };
+
+      const request = this.isEditing 
+        ? this.http.put(`/api/clients/${this.client!.id}`, clientData)
+        : this.http.post('/api/clients', clientData);
+
+      request.subscribe({
+        next: () => {
+          this.loading = false;
+          this.submitted.emit();
+        },
+        error: (error) => {
+          console.error('Error saving client:', error);
+          this.loading = false;
+          
+          if (error.error?.message) {
+            this.errors.general = error.error.message;
+          } else {
+            this.errors.general = 'Erro ao salvar cliente. Tente novamente.';
+          }
+        }
+      });
+    }
+  }
+
+  onCancel() {
+    this.cancelled.emit();
+  }
+
+  private validateForm(): boolean {
+    this.errors = {};
+    let isValid = true;
+
+    if (!this.formData.name.trim()) {
+      this.errors.name = 'Nome é obrigatório';
+      isValid = false;
+    }
+
+    if (!this.formData.birthDate) {
+      this.errors.birthDate = 'Data de nascimento é obrigatória';
+      isValid = false;
+    }
+
+    if (!this.formData.cpf_cnpj.trim()) {
+      this.errors.cpf_cnpj = 'CPF/CNPJ é obrigatório';
+      isValid = false;
+    } else if (!this.validateCpfCnpj(this.formData.cpf_cnpj)) {
+      this.errors.cpf_cnpj = 'CPF/CNPJ inválido';
+      isValid = false;
+    }
+
+    if (this.formData.monthlyIncome <= 0) {
+      this.errors.monthlyIncome = 'Renda mensal deve ser maior que zero';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  private validateCpfCnpj(value: string): boolean {
+    // Remove caracteres especiais
+    const cleanValue = value.replace(/\D/g, '');
+    
+    // Verifica se tem 11 dígitos (CPF) ou 14 dígitos (CNPJ)
+    return cleanValue.length === 11 || cleanValue.length === 14;
+  }
+
+  private formatDateForInput(date: Date | string): string {
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+  }
+
+  formatCpfCnpj() {
+    let value = this.formData.cpf_cnpj.replace(/\D/g, '');
+    
+    if (value.length <= 11) {
+      // Format as CPF: 000.000.000-00
+      value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else {
+      // Format as CNPJ: 00.000.000/0000-00
+      value = value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    }
+    
+    this.formData.cpf_cnpj = value;
+  }
+}
