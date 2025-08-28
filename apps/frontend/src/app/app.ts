@@ -1,26 +1,19 @@
-import { AsyncPipe, JsonPipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ClientInterface, LoanInterface } from '@loan-system-workspace/interfaces';
 import { ClientsListComponent } from './components/clients/clients-list.component';
-import { ClientFormComponent } from './components/clients/client-form.component';
 import { LoansListComponent } from './components/loans/loans-list.component';
-import { LoanFormComponent } from './components/loans/loan-form.component';
 import { ExchangeRatesComponent } from './components/exchange-rates/exchange-rates.component';
 import { NotificationsComponent } from './components/shared/notifications.component';
-import { NotificationService } from './services/notification.service';
 
 @Component({
   imports: [
     CommonModule,
-    AsyncPipe,
-    JsonPipe,
     RouterModule,
     ClientsListComponent,
-    ClientFormComponent,
     LoansListComponent,
-    LoanFormComponent,
     ExchangeRatesComponent,
     NotificationsComponent
   ],

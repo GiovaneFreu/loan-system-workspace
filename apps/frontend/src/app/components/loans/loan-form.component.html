@@ -1,10 +1,10 @@
-<div class="bg-white">
+<div class="bg-slate-800">
   <!-- Header -->
-  <div class="flex items-center justify-between p-6 border-b border-gray-200">
-    <h3 class="text-lg font-medium text-gray-900">{{title}}</h3>
+  <div class="flex items-center justify-between p-6 border-b border-slate-700">
+    <h3 class="text-lg font-medium text-white">{{title}}</h3>
     <button 
       (click)="onCancel()"
-      class="text-gray-400 hover:text-gray-500 focus:outline-none">
+      class="text-gray-400 hover:text-gray-300 focus:outline-none">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
@@ -14,88 +14,88 @@
   <!-- Form -->
   <form (ngSubmit)="onSubmit()" class="p-6 space-y-6">
     <!-- General Error -->
-    <div *ngIf="errors.general" class="bg-red-50 border border-red-200 rounded-md p-4">
+    <div *ngIf="errors.general" class="bg-red-900 bg-opacity-50 border border-red-600 rounded-md p-4">
       <div class="flex">
         <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
         </svg>
         <div class="ml-3">
-          <p class="text-sm text-red-600">{{errors.general}}</p>
+          <p class="text-sm text-red-300">{{errors.general}}</p>
         </div>
       </div>
     </div>
 
     <!-- Cliente -->
     <div>
-      <label for="clientId" class="block text-sm font-medium text-gray-700 mb-2">Cliente *</label>
+      <label for="clientId" class="block text-sm font-medium text-gray-300 mb-2">Cliente *</label>
       <select 
         id="clientId"
         [(ngModel)]="formData.clientId"
         name="clientId"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-        [class.border-red-300]="errors.clientId">
+        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
+        [class.border-red-600]="errors.clientId">
         <option value="0">Selecione um cliente</option>
         <option *ngFor="let client of clients" [value]="client.id">
           {{client.name}} ({{client.cpf_cnpj}})
         </option>
       </select>
-      <p *ngIf="errors.clientId" class="mt-1 text-sm text-red-600">{{errors.clientId}}</p>
+      <p *ngIf="errors.clientId" class="mt-1 text-sm text-red-300">{{errors.clientId}}</p>
     </div>
 
     <!-- Data do Empréstimo -->
     <div>
-      <label for="purchaseDate" class="block text-sm font-medium text-gray-700 mb-2">Data do Empréstimo *</label>
+      <label for="purchaseDate" class="block text-sm font-medium text-gray-300 mb-2">Data do Empréstimo *</label>
       <input 
         id="purchaseDate"
         type="date" 
         [(ngModel)]="formData.purchaseDate"
         name="purchaseDate"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-        [class.border-red-300]="errors.purchaseDate">
-      <p *ngIf="errors.purchaseDate" class="mt-1 text-sm text-red-600">{{errors.purchaseDate}}</p>
+        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
+        [class.border-red-600]="errors.purchaseDate">
+      <p *ngIf="errors.purchaseDate" class="mt-1 text-sm text-red-300">{{errors.purchaseDate}}</p>
     </div>
 
     <!-- Data de Vencimento -->
     <div>
-      <label for="dueDate" class="block text-sm font-medium text-gray-700 mb-2">Data de Vencimento *</label>
+      <label for="dueDate" class="block text-sm font-medium text-gray-300 mb-2">Data de Vencimento *</label>
       <input 
         id="dueDate"
         type="date" 
         [(ngModel)]="formData.dueDate"
         name="dueDate"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-        [class.border-red-300]="errors.dueDate">
-      <p *ngIf="errors.dueDate" class="mt-1 text-sm text-red-600">{{errors.dueDate}}</p>
-      <p *ngIf="monthsDifference > 0" class="mt-1 text-sm text-gray-500">
+        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
+        [class.border-red-600]="errors.dueDate">
+      <p *ngIf="errors.dueDate" class="mt-1 text-sm text-red-300">{{errors.dueDate}}</p>
+      <p *ngIf="monthsDifference > 0" class="mt-1 text-sm text-gray-400">
         Prazo: {{monthsDifference}} meses
       </p>
     </div>
 
     <!-- Moeda -->
     <div>
-      <label for="currencyType" class="block text-sm font-medium text-gray-700 mb-2">Moeda *</label>
+      <label for="currencyType" class="block text-sm font-medium text-gray-300 mb-2">Moeda *</label>
       <select 
         id="currencyType"
         [(ngModel)]="formData.currencyType"
         name="currencyType"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white">
         <option *ngFor="let currency of currencies" [value]="currency">
           {{currency}} - {{getCurrencySymbol(currency)}}
         </option>
       </select>
-      <p *ngIf="exchangeRates[formData.currencyType] && formData.currencyType !== 'BRL'" class="mt-1 text-sm text-gray-500">
+      <p *ngIf="exchangeRates[formData.currencyType] && formData.currencyType !== 'BRL'" class="mt-1 text-sm text-gray-400">
         Taxa de conversão: {{exchangeRates[formData.currencyType] | number:'1.4-4'}} BRL
       </p>
     </div>
 
     <!-- Valor -->
     <div>
-      <label for="purchaseValue" class="block text-sm font-medium text-gray-700 mb-2">
+      <label for="purchaseValue" class="block text-sm font-medium text-gray-300 mb-2">
         Valor Obtido *
-        <span class="text-gray-500">({{getCurrencySymbol(formData.currencyType)}})</span>
+        <span class="text-gray-400">({{getCurrencySymbol(formData.currencyType)}})</span>
       </label>
       <div class="relative">
-        <span class="absolute left-3 top-2 text-gray-500">{{getCurrencySymbol(formData.currencyType)}}</span>
+        <span class="absolute left-3 top-2 text-gray-400">{{getCurrencySymbol(formData.currencyType)}}</span>
         <input 
           id="purchaseValue"
           type="number" 
@@ -103,35 +103,35 @@
           name="purchaseValue"
           step="0.01"
           min="0"
-          class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          [class.border-red-300]="errors.purchaseValue"
+          class="w-full pl-10 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white placeholder-gray-400"
+          [class.border-red-600]="errors.purchaseValue"
           placeholder="0,00">
       </div>
-      <p *ngIf="errors.purchaseValue" class="mt-1 text-sm text-red-600">{{errors.purchaseValue}}</p>
+      <p *ngIf="errors.purchaseValue" class="mt-1 text-sm text-red-300">{{errors.purchaseValue}}</p>
       <p *ngIf="formData.purchaseValue > 0 && formData.currencyType !== 'BRL'" class="mt-1 text-sm text-blue-600">
         Equivalente em R$: {{formatCurrency(convertedValue)}}
       </p>
     </div>
 
     <!-- Calculations Preview -->
-    <div *ngIf="monthsDifference > 0 && formData.purchaseValue > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-      <h4 class="text-sm font-medium text-blue-900 mb-3">Previsão de Cálculo (5% a.a.)</h4>
+    <div *ngIf="monthsDifference > 0 && formData.purchaseValue > 0" class="bg-slate-700 border border-slate-600 rounded-lg p-4">
+      <h4 class="text-sm font-medium text-blue-300 mb-3">Previsão de Cálculo (5% a.a.)</h4>
       <div class="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <span class="text-blue-700">Valor inicial (BRL):</span>
-          <div class="font-medium text-blue-900">{{formatCurrency(convertedValue)}}</div>
+          <span class="text-blue-300">Valor inicial (BRL):</span>
+          <div class="font-medium text-white">{{formatCurrency(convertedValue)}}</div>
         </div>
         <div>
-          <span class="text-blue-700">Prazo:</span>
-          <div class="font-medium text-blue-900">{{monthsDifference}} meses</div>
+          <span class="text-blue-300">Prazo:</span>
+          <div class="font-medium text-white">{{monthsDifference}} meses</div>
         </div>
         <div>
-          <span class="text-blue-700">Valor final previsto:</span>
-          <div class="font-medium text-green-600">{{formatCurrency(finalAmount)}}</div>
+          <span class="text-blue-300">Valor final previsto:</span>
+          <div class="font-medium text-green-400">{{formatCurrency(finalAmount)}}</div>
         </div>
         <div>
-          <span class="text-blue-700">Juros:</span>
-          <div class="font-medium text-blue-900">{{formatCurrency(finalAmount - convertedValue)}}</div>
+          <span class="text-blue-300">Juros:</span>
+          <div class="font-medium text-white">{{formatCurrency(finalAmount - convertedValue)}}</div>
         </div>
       </div>
     </div>
@@ -141,7 +141,7 @@
       <button 
         type="button"
         (click)="onCancel()"
-        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        class="px-4 py-2 text-sm font-medium text-gray-300 bg-slate-700 border border-slate-600 rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
         Cancelar
       </button>
       <button 
