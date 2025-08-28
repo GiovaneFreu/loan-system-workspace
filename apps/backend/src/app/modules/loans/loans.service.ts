@@ -1,32 +1,88 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
 import { DATA_SOURCE } from '../../database/datasource.provider';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import { Loan } from './entities/loan.entity';
+import { LoanCalculationsService } from './loan-calculations.service';
 
 @Injectable()
 export class LoansService {
+  private loanRepository: Repository<Loan>;
 
-  @Inject(DATA_SOURCE) private readonly dataSource: DataSource
-
-  create(createLoanDto: CreateLoanDto) {
-    return 'This action adds a new loan';
+  constructor(
+    @Inject(DATA_SOURCE) private readonly dataSource: DataSource,
+    private readonly calculationsService: LoanCalculationsService
+  ) {
+    this.loanRepository = this.dataSource.getRepository(Loan);
   }
 
-  findAll() {
-    return this.dataSource.manager.find(Loan)
+  async create(createLoanDto: CreateLoanDto): Promise<Loan> {
+    const { clientId, ...loanData } = createLoanDto;
+    const loan = this.loanRepository.create({
+      ...loanData,
+      client: { id: clientId } as any
+    });
+    return await this.loanRepository.save(loan);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} loan`;
+  async findAll(): Promise<Loan[]> {
+    return await this.loanRepository.find({
+      relations: ['client']
+    });
   }
 
-  update(id: number, updateLoanDto: UpdateLoanDto) {
-    return `This action updates a #${id} loan`;
+  async findOne(id: number): Promise<Loan> {
+    const loan = await this.loanRepository.findOne({
+      where: { id },
+      relations: ['client']
+    });
+
+    if (!loan) {
+      throw new NotFoundException(`Loan with ID ${id} not found`);
+    }
+
+    return loan;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} loan`;
+  async update(id: number, updateLoanDto: UpdateLoanDto): Promise<Loan> {
+    const loan = await this.findOne(id);
+    Object.assign(loan, updateLoanDto);
+    return await this.loanRepository.save(loan);
+  }
+
+  async remove(id: number): Promise<void> {
+    const result = await this.loanRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Loan with ID ${id} not found`);
+    }
+  }
+
+  async findByClientId(clientId: number): Promise<Loan[]> {
+    return await this.loanRepository.find({
+      where: { client: { id: clientId } },
+      relations: ['client']
+    });
+  }
+
+  calculateLoanDetails(loan: Loan, conversionRate: number = 1, interestRate: number = 5) {
+    const months = this.calculationsService.calculateMonthsDifference(
+      loan.purchaseDate,
+      loan.dueDate
+    );
+    
+    const finalAmount = this.calculationsService.calculateFinalAmount(
+      loan.purchaseValue,
+      conversionRate,
+      months,
+      interestRate
+    );
+
+    return {
+      monthsCount: months,
+      finalAmount,
+      conversionRate,
+      interestRate
+    };
   }
 }

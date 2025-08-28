@@ -6,6 +6,10 @@ export interface LoanInterface {
   purchaseDate: Date;
   currencyType: CurrencyType;
   purchaseValue: number;
-  dueDate:Date;
-  client:ClientInterface;
+  dueDate: Date;
+  client: ClientInterface;
+  conversionRate?: number;
+  finalAmount?: number;
+  monthsCount?: number;
+  interestRate?: number;
 }
