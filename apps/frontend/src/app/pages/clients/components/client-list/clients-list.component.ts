@@ -1,25 +1,23 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, inject } from '@angular/core';
 import { ClientInterface } from '@loan-system-workspace/interfaces';
-import { ClientFormComponent } from './client-form.component';
 
 @Component({
   selector: 'app-clients-list',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ClientFormComponent],
+  standalone: false,
   templateUrl: './clients-list.component.html',
   styleUrl: './clients-list.component.css'
 })
 export class ClientsListComponent implements OnInit {
+  protected readonly title = 'Gerenciar Clientes';
+
   clients: ClientInterface[] = [];
   filteredClients: ClientInterface[] = [];
   loading = false;
   searchTerm = '';
   showForm = false;
   editingClient: ClientInterface | null = null;
-  
+
   private http = inject(HttpClient);
 
   ngOnInit() {
@@ -96,4 +94,6 @@ export class ClientsListComponent implements OnInit {
   formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString('pt-BR');
   }
+
+
 }

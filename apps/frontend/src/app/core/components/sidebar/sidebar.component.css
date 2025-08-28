@@ -1,0 +1,15 @@
+a {
+  @apply flex items-center px-4 py-3 rounded-lg transition-all duration-200;
+}
+
+.active{
+@apply bg-blue-600 text-white;
+}
+
+.inactive{
+@apply text-slate-300 hover:bg-slate-700 hover:text-white;
+}
+
+svg {
+  @apply w-5 h-5 mr-3 fill-none stroke-current;
+}

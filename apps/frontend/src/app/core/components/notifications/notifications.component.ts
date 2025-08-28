@@ -1,11 +1,9 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { NotificationService, Notification } from '../../services/notification.service';
+import { Notification, NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-notifications',
-  standalone: true,
-  imports: [CommonModule],
+  standalone: false,
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.css'
 })

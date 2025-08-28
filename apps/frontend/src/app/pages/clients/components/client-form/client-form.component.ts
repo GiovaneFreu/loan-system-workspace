@@ -1,13 +1,10 @@
-import { Component, EventEmitter, Input, Output, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { ClientInterface } from '@loan-system-workspace/interfaces';
 
 @Component({
   selector: 'app-client-form',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  standalone: false,
   templateUrl: './client-form.component.html',
   styleUrl: './client-form.component.css'
 })
@@ -25,7 +22,7 @@ export class ClientFormComponent implements OnInit {
 
   loading = false;
   errors: any = {};
-  
+
   private http = inject(HttpClient);
 
   ngOnInit() {
@@ -57,7 +54,7 @@ export class ClientFormComponent implements OnInit {
         birthDate: new Date(this.formData.birthDate).toISOString()
       };
 
-      const request = this.isEditing 
+      const request = this.isEditing
         ? this.http.put(`/api/clients/${this.client!.id}`, clientData)
         : this.http.post('/api/clients', clientData);
 
@@ -69,7 +66,7 @@ export class ClientFormComponent implements OnInit {
         error: (error) => {
           console.error('Error saving client:', error);
           this.loading = false;
-          
+
           if (error.error?.message) {
             this.errors.general = error.error.message;
           } else {
@@ -117,7 +114,7 @@ export class ClientFormComponent implements OnInit {
   private validateCpfCnpj(value: string): boolean {
     // Remove caracteres especiais
     const cleanValue = value.replace(/\D/g, '');
-    
+
     // Verifica se tem 11 dígitos (CPF) ou 14 dígitos (CNPJ)
     return cleanValue.length === 11 || cleanValue.length === 14;
   }
@@ -129,7 +126,7 @@ export class ClientFormComponent implements OnInit {
 
   formatCpfCnpj() {
     let value = this.formData.cpf_cnpj.replace(/\D/g, '');
-    
+
     if (value.length <= 11) {
       // Format as CPF: 000.000.000-00
       value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
@@ -137,7 +134,7 @@ export class ClientFormComponent implements OnInit {
       // Format as CNPJ: 00.000.000/0000-00
       value = value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
     }
-    
+
     this.formData.cpf_cnpj = value;
   }
 }

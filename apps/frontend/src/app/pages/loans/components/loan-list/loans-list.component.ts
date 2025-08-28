@@ -1,19 +1,17 @@
-import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { ClientInterface, CurrencyType, LoanInterface } from '@loan-system-workspace/interfaces';
-import { LoanCalculationsService } from '../../services/loan-calculations.service';
-import { LoanFormComponent } from './loan-form.component';
+import { LoanCalculationsService } from '../../../../core/services/loan-calculations.service';
 
 @Component({
   selector: 'app-loans-list',
-  standalone: true,
-  imports: [CommonModule, FormsModule, LoanFormComponent],
+  standalone: false,
   templateUrl: './loans-list.component.html',
   styleUrl: './loans-list.component.css'
 })
 export class LoansListComponent implements OnInit {
+  protected readonly title = 'Gerenciar Empréstimos';
+
   loans: LoanInterface[] = [];
   filteredLoans: LoanInterface[] = [];
   clients: ClientInterface[] = [];

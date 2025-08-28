@@ -25,6 +25,7 @@ export default [
         },
       ],
     },
+    '@angular-eslint/prefer-standalone': false,
   },
   {
     files: ['**/*.html'],
