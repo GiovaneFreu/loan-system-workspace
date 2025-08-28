@@ -24,7 +24,26 @@ export const databaseProviders = [
         ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
       });
 
-      return dataSource.initialize();
+      const maxRetries = 5;
+      const retryDelay = 5000;
+      
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          await dataSource.initialize();
+          console.log('Database connected successfully');
+          return dataSource;
+        } catch (error) {
+          console.error(`Database connection attempt ${attempt}/${maxRetries} failed:`, error.message);
+          
+          if (attempt === maxRetries) {
+            console.error('Max retries reached. Database connection failed permanently.');
+            throw error;
+          }
+          
+          console.log(`Retrying in ${retryDelay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+      }
     },
   },
 ];
