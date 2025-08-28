@@ -13,14 +13,10 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: apps/backend/Dockerfile
-    environment:
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_USER: loan_user
-      DATABASE_PASSWORD: loan_pass123
-      DATABASE_NAME: loan_system_db
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.dev
+    env_file:
+      - ../environments/.env.docker
     ports:
       - "3000:3000"
     depends_on:
