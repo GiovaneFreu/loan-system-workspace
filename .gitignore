@@ -44,3 +44,7 @@ Thumbs.db
 .github/instructions/nx.instructions.md
 
 .angular
+
+# Environment files
+.env.staging
+.env.production

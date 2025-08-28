@@ -1,0 +1,40 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: rg-loan-system-staging
+  ACR_NAME: loansystemacr
+  CONTAINER_APP_NAME: loan-system-app-staging
+
+jobs:
+  deploy:
+    name: Deploy to Azure Staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_STAGING }}
+
+      - name: Build and push to ACR
+        run: |
+          az acr build \
+            --registry ${{ env.ACR_NAME }} \
+            --image loan-system:${{ github.sha }} \
+            --image loan-system:staging-latest \
+            --file infrastructure/docker/Dockerfile.prod \
+            .
+
+      - name: Deploy to Container Apps (placeholder)
+        run: |
+          echo "Container Apps deployment would happen here"
+          echo "Image: ${{ env.ACR_NAME }}.azurecr.io/loan-system:${{ github.sha }}"

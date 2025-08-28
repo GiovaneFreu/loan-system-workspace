@@ -1,0 +1,68 @@
+# Build stage for frontend
+FROM node:24-alpine AS frontend-build
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY nx.json ./
+COPY tsconfig.base.json ./
+
+RUN npm ci
+
+COPY apps/frontend ./apps/frontend
+COPY libs ./libs
+
+RUN npx nx build frontend --configuration=production
+
+# Build stage for backend
+FROM node:24-alpine AS backend-build
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY nx.json ./
+COPY tsconfig.base.json ./
+
+RUN npm ci
+
+COPY apps/backend ./apps/backend
+COPY libs ./libs
+
+RUN npx nx build backend --configuration=production
+
+# Production stage
+FROM node:24-alpine AS production
+RUN apk add --no-cache dumb-init
+
+# Security: Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+WORKDIR /app
+
+# Copy production dependencies
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy built applications
+COPY --from=backend-build --chown=nodejs:nodejs /app/dist/apps/backend ./dist/apps/backend
+COPY --from=frontend-build --chown=nodejs:nodejs /app/dist/apps/frontend ./dist/apps/frontend
+
+# Add health check script
+COPY --chown=nodejs:nodejs infrastructure/docker/healthcheck.js ./healthcheck.js
+
+# Security: Switch to non-root user
+USER nodejs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node healthcheck.js || exit 1
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start application
+CMD ["node", "dist/apps/backend/main.js"]
