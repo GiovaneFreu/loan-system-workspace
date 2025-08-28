@@ -16,7 +16,5 @@ import { AppComponent, NotificationsComponent, SidebarComponent } from './compon
   exports:[
     AppComponent
   ],
-  providers: [
-  ],
 })
 export class CoreModule { }

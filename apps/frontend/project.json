@@ -20,7 +20,10 @@
             "input": "apps/frontend/public"
           }
         ],
-        "styles": ["apps/frontend/src/styles.css"]
+        "styles": ["apps/frontend/src/styles.css"],
+        "stylePreprocessorOptions": {
+          "includePaths": ["apps/frontend/src"]
+        }
       },
       "configurations": {
         "production": {
