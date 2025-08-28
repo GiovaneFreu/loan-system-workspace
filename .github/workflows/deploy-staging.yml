@@ -44,4 +44,4 @@ jobs:
           az containerapp update \
             --name ${{ env.CONTAINER_APP_NAME }} \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.ACR_NAME }}.azurecr.io/loan-system:${{ github.sha }}
+            --image ${{ env.ACR_NAME }}.azurecr.io/loan-system:staging-latest
