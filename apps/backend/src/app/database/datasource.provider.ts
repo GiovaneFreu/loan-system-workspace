@@ -1,28 +1,28 @@
 
+import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { Client } from '../modules/clients/entities/client.entity';
 import { Loan } from '../modules/loans/entities/loan.entity';
-import {env} from 'node:process'
 
 export const DATA_SOURCE = 'DATA_SOURCE';
 
 export const databaseProviders = [
   {
     provide: DATA_SOURCE,
-    useFactory: async () => {
+    useFactory: async (configService: ConfigService) => {
       const dataSource = new DataSource({
         type: 'postgres',
-        host: env.DATABASE_HOST,
-        port: parseInt(env.DATABASE_PORT),
-        username: env.DATABASE_USER,
-        password: env.DATABASE_PASSWORD,
-        database: env.DATABASE_NAME,
+        host: configService.get<string>('DATABASE_HOST'),
+        port: configService.get<number>('DATABASE_PORT'),
+        username: configService.get<string>('DATABASE_USER'),
+        password: configService.get<string>('DATABASE_PASSWORD'),
+        database: configService.get<string>('DATABASE_NAME'),
         entities: [
           Client,
           Loan,
         ],
         synchronize: true,
-        ssl: env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
+        ssl: configService.get<boolean>('DATABASE_SSL') ? { rejectUnauthorized: false } : false,
       });
 
       const maxRetries = 5;
@@ -46,5 +46,6 @@ export const databaseProviders = [
         }
       }
     },
+    inject: [ConfigService],
   },
 ];
