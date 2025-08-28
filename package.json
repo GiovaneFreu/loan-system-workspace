@@ -13,6 +13,7 @@
     "@angular/platform-browser-dynamic": "~20.1.0",
     "@angular/router": "~20.1.0",
     "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/serve-static": "^5.0.3",

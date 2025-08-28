@@ -58,6 +58,9 @@
         },
         "production": {
           "buildTarget": "backend:build:production"
+        },
+        "staging": {
+          "buildTarget": "backend:build:staging"
         }
       }
     },

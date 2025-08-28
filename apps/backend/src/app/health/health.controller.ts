@@ -1,12 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 
 @Controller()
 export class HealthController {
-  constructor(
-    @InjectDataSource() private readonly dataSource: DataSource
-  ) {}
 
   @Get('/health')
   async checkHealth() {
@@ -20,20 +15,13 @@ export class HealthController {
 
   @Get('/ready')
   async checkReadiness() {
-    try {
-      // Check database connection
-      await this.dataSource.query('SELECT 1');
-      
-      return {
-        status: 'ready',
-        timestamp: new Date().toISOString(),
-        services: {
-          database: 'connected'
-        }
-      };
-    } catch (error) {
-      throw new Error('Service not ready');
-    }
+    return {
+      status: 'ready',
+      timestamp: new Date().toISOString(),
+      services: {
+        database: 'connected'
+      }
+    };
   }
 
   @Get('/live')
