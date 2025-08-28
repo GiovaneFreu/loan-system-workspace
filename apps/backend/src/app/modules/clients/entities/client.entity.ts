@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { ClientInterface } from '@loan-system-workspace/interfaces';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ClientInterface, LoanInterface } from '@loan-system-workspace/interfaces';
+import { Loan } from '../../loans/entities/loan.entity';
 
 @Entity()
 export class Client implements ClientInterface {
@@ -17,4 +18,8 @@ export class Client implements ClientInterface {
 
   @Column({ type: "float", scale: 2, nullable: false })
   monthlyIncome: number;
+
+  @OneToMany(() => Loan, (loan) => loan.client)
+  loans: LoanInterface[];
+
 }

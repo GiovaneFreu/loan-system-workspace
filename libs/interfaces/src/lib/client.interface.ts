@@ -1,7 +1,10 @@
+import { LoanInterface } from './loan.interface';
+
 export interface ClientInterface {
   id: number;
   name: string;
   birthDate: Date;
   cpf_cnpj: string;
   monthlyIncome: number;
+  loans?: LoanInterface[];
 }
