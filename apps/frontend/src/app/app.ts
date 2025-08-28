@@ -5,6 +5,11 @@ import { RouterModule } from '@angular/router';
 import { ClientInterface, LoanInterface } from '@loan-system-workspace/interfaces';
 import { ClientsListComponent } from './components/clients/clients-list.component';
 import { ClientFormComponent } from './components/clients/client-form.component';
+import { LoansListComponent } from './components/loans/loans-list.component';
+import { LoanFormComponent } from './components/loans/loan-form.component';
+import { ExchangeRatesComponent } from './components/exchange-rates/exchange-rates.component';
+import { NotificationsComponent } from './components/shared/notifications.component';
+import { NotificationService } from './services/notification.service';
 
 @Component({
   imports: [
@@ -13,7 +18,11 @@ import { ClientFormComponent } from './components/clients/client-form.component'
     JsonPipe,
     RouterModule,
     ClientsListComponent,
-    ClientFormComponent
+    ClientFormComponent,
+    LoansListComponent,
+    LoanFormComponent,
+    ExchangeRatesComponent,
+    NotificationsComponent
   ],
   selector: 'app-root',
   templateUrl: './app.html',
