@@ -1,10 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LoanInterface, ClientInterface, CurrencyType } from '@loan-system-workspace/interfaces';
-import { LoanFormComponent } from './loan-form.component';
+import { ClientInterface, CurrencyType, LoanInterface } from '@loan-system-workspace/interfaces';
 import { LoanCalculationsService } from '../../services/loan-calculations.service';
+import { LoanFormComponent } from './loan-form.component';
 
 @Component({
   selector: 'app-loans-list',
@@ -22,7 +22,7 @@ export class LoansListComponent implements OnInit {
   searchTerm = '';
   showForm = false;
   editingLoan: LoanInterface | null = null;
-  
+
   private http = inject(HttpClient);
   private calculationsService = inject(LoanCalculationsService);
 
@@ -113,10 +113,10 @@ export class LoansListComponent implements OnInit {
 
   calculateLoanDetails(loan: LoanInterface) {
     const summary = this.calculationsService.calculateLoanSummary(loan, this.exchangeRates);
-    
+
     // Show detailed calculation in console for now
     console.log('Loan calculation summary:', summary);
-    
+
     // TODO: Show details in a modal
     alert(`Resumo do Empréstimo #${loan.id}:\n` +
           `Valor original: ${this.calculationsService.getCurrencySymbol(loan.currencyType)} ${loan.purchaseValue.toFixed(2)}\n` +
@@ -143,7 +143,7 @@ export class LoansListComponent implements OnInit {
     return this.calculationsService.calculateMonthsDifference(startDate, endDate);
   }
 
-  calculateFinalAmount(loan: LoanInterface, interestRate: number = 5): number {
+  calculateFinalAmount(loan: LoanInterface, interestRate = 5): number {
     const months = this.calculateMonthsDifference(loan.purchaseDate, loan.dueDate);
     const conversionRate = this.exchangeRates[loan.currencyType] || 1;
     return this.calculationsService.calculateFinalAmount(loan.purchaseValue, conversionRate, months, interestRate);

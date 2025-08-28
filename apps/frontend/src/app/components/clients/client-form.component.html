@@ -2,9 +2,10 @@
   <!-- Header -->
   <div class="flex items-center justify-between p-6 border-b border-slate-700">
     <h3 class="text-lg font-medium text-white">{{title}}</h3>
-    <button 
+    <button
       (click)="onCancel()"
-      class="text-gray-400 hover:text-gray-300 focus:outline-none">
+      class="text-gray-400 hover:text-gray-300 focus:outline-none"
+      title="Fechar">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
@@ -28,9 +29,9 @@
     <!-- Nome -->
     <div>
       <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Nome Completo *</label>
-      <input 
+      <input
         id="name"
-        type="text" 
+        type="text"
         [(ngModel)]="formData.name"
         name="name"
         class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white placeholder-gray-400"
@@ -42,9 +43,9 @@
     <!-- Data de Nascimento -->
     <div>
       <label for="birthDate" class="block text-sm font-medium text-gray-300 mb-2">Data de Nascimento *</label>
-      <input 
+      <input
         id="birthDate"
-        type="date" 
+        type="date"
         [(ngModel)]="formData.birthDate"
         name="birthDate"
         class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
@@ -55,9 +56,9 @@
     <!-- CPF/CNPJ -->
     <div>
       <label for="cpf_cnpj" class="block text-sm font-medium text-gray-300 mb-2">CPF/CNPJ *</label>
-      <input 
+      <input
         id="cpf_cnpj"
-        type="text" 
+        type="text"
         [(ngModel)]="formData.cpf_cnpj"
         name="cpf_cnpj"
         (blur)="formatCpfCnpj()"
@@ -73,9 +74,9 @@
       <label for="monthlyIncome" class="block text-sm font-medium text-gray-300 mb-2">Renda Mensal *</label>
       <div class="relative">
         <span class="absolute left-3 top-2 text-gray-400">R$</span>
-        <input 
+        <input
           id="monthlyIncome"
-          type="number" 
+          type="number"
           [(ngModel)]="formData.monthlyIncome"
           name="monthlyIncome"
           step="0.01"
@@ -89,13 +90,13 @@
 
     <!-- Buttons -->
     <div class="flex items-center justify-end space-x-3 pt-4">
-      <button 
+      <button
         type="button"
         (click)="onCancel()"
         class="px-4 py-2 text-sm font-medium text-gray-300 bg-slate-700 border border-slate-600 rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
         Cancelar
       </button>
-      <button 
+      <button
         type="submit"
         [disabled]="loading"
         class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
