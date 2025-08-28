@@ -45,13 +45,12 @@ Thumbs.db
 
 .angular
 
-# Environment files
+# Environment files (keep only .env.example)
 .env
 .env.local
-.env.staging
-.env.production
-.env.development
+infrastructure/environments/.env.development
+infrastructure/environments/.env.production
+infrastructure/environments/.env.staging
+infrastructure/environments/.env.docker
 infrastructure/environments/.env.local
-infrastructure/environments/.env.development.local
-infrastructure/environments/.env.production.local
-infrastructure/environments/.env.test.local
+infrastructure/environments/.env.*.local
