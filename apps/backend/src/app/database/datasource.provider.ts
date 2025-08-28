@@ -21,6 +21,7 @@ export const databaseProviders = [
           Loan,
         ],
         synchronize: true,
+        ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
       });
 
       return dataSource.initialize();
