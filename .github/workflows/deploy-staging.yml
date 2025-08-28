@@ -39,7 +39,9 @@ jobs:
             --file infrastructure/docker/Dockerfile.prod \
             .
 
-      - name: Deploy to Container Apps (placeholder)
+      - name: Deploy to Container Apps
         run: |
-          echo "Container Apps deployment would happen here"
-          echo "Image: ${{ env.ACR_NAME }}.azurecr.io/loan-system:${{ github.sha }}"
+          az containerapp update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.ACR_NAME }}.azurecr.io/loan-system:${{ github.sha }}
