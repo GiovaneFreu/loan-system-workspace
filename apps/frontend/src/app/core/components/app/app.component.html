@@ -1,11 +1,7 @@
-<div class="flex min-h-screen w-full h-full overflow-hidden">
-<app-sidebar class="min-h-screen w-64 flex"></app-sidebar>
-
-<main class="flex-1 ml-64">
-  <div class="p-6 bg-slate-900 min-h-screen">
+<div class="flex h-screen w-full">
+  <app-sidebar class="w-64 flex-shrink-0"></app-sidebar>
+  <div class="outlet">
     <router-outlet></router-outlet>
   </div>
-</main>
- </div>
-
- <app-notifications></app-notifications>
+  <app-notifications class="absolute bottom-0 right-0"></app-notifications>
+</div>

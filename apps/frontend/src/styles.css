@@ -3,7 +3,12 @@
 @import 'tailwindcss/utilities';
 
 body, html {
-  min-height: 100vh;
+  height: 100%;
   margin: 0;
   padding: 0;
+}
+
+#root, app-root {
+  height: 100%;
+  display: block;
 }

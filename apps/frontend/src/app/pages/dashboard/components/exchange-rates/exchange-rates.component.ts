@@ -1,12 +1,10 @@
-import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { CurrencyType } from '@loan-system-workspace/interfaces';
 
 @Component({
   selector: 'app-exchange-rates',
-  standalone: true,
-  imports: [CommonModule],
+  standalone: false,
   templateUrl: './exchange-rates.component.html',
   styleUrl: './exchange-rates.component.css'
 })
@@ -18,7 +16,7 @@ export class ExchangeRatesComponent implements OnInit {
   private http = inject(HttpClient);
 
   ngOnInit() {
-    // this.loadExchangeRates();
+    this.loadExchangeRates();
   }
 
   loadExchangeRates() {
@@ -87,8 +85,6 @@ export class ExchangeRatesComponent implements OnInit {
   }
 
   getRateVariation(currency: string): 'up' | 'down' | 'neutral' {
-    // Mock variation for demo purposes
-    // In a real app, you'd compare with previous rates
     const mockVariations: Record<string, 'up' | 'down' | 'neutral'> = {
       [CurrencyType.USD]: 'up',
       [CurrencyType.EUR]: 'down',

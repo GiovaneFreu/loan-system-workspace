@@ -4,7 +4,10 @@ import { Component, OnInit } from '@angular/core';
   selector: 'app-component',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  standalone: false
+  standalone: false,
+  host: {
+    class: 'block h-full'
+  }
 })
 export class AppComponent implements OnInit {
 

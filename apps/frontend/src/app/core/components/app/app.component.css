@@ -1,0 +1,3 @@
+div.outlet {
+@apply flex-1 overflow-auto bg-slate-900 p-10;
+}

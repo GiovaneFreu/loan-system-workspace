@@ -1,0 +1,11 @@
+div.card {
+  @apply bg-slate-800 rounded-lg shadow p-6 border border-slate-700 flex items-center;
+}
+
+div.card-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full flex-shrink-0;
+}
+
+div.card-image {
+  @apply w-16 h-16 flex-shrink-0 rounded-lg flex items-center justify-center;
+}
