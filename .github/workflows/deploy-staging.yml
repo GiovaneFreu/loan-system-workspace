@@ -78,7 +78,27 @@ jobs:
 
       - name: Deploy to Container Apps
         run: |
+          # Garantir modo Single revision para staging
           az containerapp update \
             --name ${{ env.CONTAINER_APP_NAME }} \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.ACR_NAME }}.azurecr.io/loan-system:staging-latest
+            --revision-mode single
+          
+          # Atualizar a imagem e forçar restart
+          az containerapp update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.ACR_NAME }}.azurecr.io/loan-system:staging-latest \
+            --min-replicas 0
+          
+          # Aguardar para garantir que o container seja parado
+          sleep 5
+          
+          # Restaurar réplicas para forçar novo container com nova imagem
+          az containerapp update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --min-replicas 1 \
+            --max-replicas 1
+          
+          echo "✅ Deploy completed with automatic restart"
