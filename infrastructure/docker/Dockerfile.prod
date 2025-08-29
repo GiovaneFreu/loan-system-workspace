@@ -6,6 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY nx.json ./
 COPY tsconfig.base.json ./
+COPY tailwind.config.js postcss.config.js ./
 
 RUN npm ci
 
