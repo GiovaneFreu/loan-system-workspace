@@ -76,5 +76,8 @@
       "style": "css",
       "unitTestRunner": "jest"
     }
+  },
+  "tui": {
+    "enabled": false
   }
 }

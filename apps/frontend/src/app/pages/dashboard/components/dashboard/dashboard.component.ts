@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, inject } from '@angular/core';
-import { LoanInterface } from '@loan-system-workspace/interfaces';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { DashboardInterface, LoanInterface } from '@loan-system-workspace/interfaces';
+import { DashboardService } from '../../services';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -8,24 +10,19 @@ import { LoanInterface } from '@loan-system-workspace/interfaces';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent  {
-  private readonly http = inject(HttpClient);
-
+export class DashboardComponent implements  OnDestroy {
   protected readonly title = 'Dashboard';
 
-  protected totalClients = 0;
-  protected totalLoans = 0;
-  protected totalValue = 0;
+  private readonly dashboardService = inject(DashboardService);
+  private readonly notificationService = inject(NotificationService);
 
-  private loadDashboardData() {
-    this.http.get<LoanInterface[]>('/api/loans').subscribe({
-      next: (loans) => {
-        this.totalLoans = loans.length;
-        this.totalValue = loans.reduce((sum, loan) => sum + loan.purchaseValue, 0);
-      },
-      error: (error) => console.error('Error loading loans:', error)
-    });
+  protected data:DashboardInterface | null = null;
+  private readonly subscription = this.dashboardService.getDashboardData().subscribe({
+    next: (data) => this.data = data,
+    error: (error) => this.notificationService.showError('Não foi possível carregar os dados do dashboard', error?.message)
+  })
 
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
   }
-
 }
