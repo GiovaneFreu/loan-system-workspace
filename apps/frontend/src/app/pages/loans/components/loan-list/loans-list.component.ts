@@ -1,10 +1,9 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject, OnDestroy, model, computed } from '@angular/core';
 import { ClientInterface, CurrencyType, LoanInterface } from '@loan-system-workspace/interfaces';
-import { forkJoin, Subscription } from 'rxjs';
+import { forkJoin, Subscription, map, catchError } from 'rxjs';
 import { LoansService } from '../services';
-import { NotificationService } from '../../../../core/services';
 import { ClientsService } from '../../../clients/services';
+import { NotificationService } from '../../../../core/services';
 
 @Component({
   selector: 'app-loans-list',
@@ -20,7 +19,7 @@ export class LoansListComponent implements OnInit, OnDestroy {
   protected readonly title = 'Gerenciar Empréstimos';
 
   private loans: LoanInterface[] = [];
-  private clients: ClientInterface[] = [];
+  protected clients: ClientInterface[] = [];
   protected loading = false;
   protected showForm = false;
   protected editingLoan: LoanInterface | null = null;
@@ -54,17 +53,23 @@ export class LoansListComponent implements OnInit, OnDestroy {
   })
 
   protected loadLoans() {
-    return this.loansService.findAll().subscribe({
-      next: (loans) =>this.loans = loans,
-      error: (error) => this.notificationService.showError('Erro ao carregar a lista de empréstimos', error?.message || 'Erro desconhecido')
-    });
+    return this.loansService.findAll().pipe(
+      map(loans =>this.loans = loans),
+      catchError((error)=> {
+        this.notificationService.showError('Erro ao carregar a lista de empréstimos', error?.message || 'Erro desconhecido')
+          throw  error;
+        })
+    );
   }
 
   protected loadClients() {
-    return this.clientsService.findAll().subscribe({
-      next: (clients) => this.clients = clients,
-      error: (error) => this.notificationService.showError('Erro ao carregar clientes', error?.message || 'Erro desconhecido')
-    });
+    return this.clientsService.findAll().pipe(
+      map(clients => this.clients = clients),
+      catchError(error => {
+        this.notificationService.showError('Erro ao carregar clientes', error?.message || 'Erro desconhecido');
+        throw error;
+      })
+    )
   }
 
   //TODO - redundante com clients, ver para usar herança
@@ -101,41 +106,29 @@ export class LoansListComponent implements OnInit, OnDestroy {
     }
   }
 
-  calculateLoanDetails(loan: LoanInterface) {
-    const summary = this.calculationsService.calculateLoanSummary(loan, this.exchangeRates);
-
-    // Show detailed calculation in console for now
-    console.log('Loan calculation summary:', summary);
-
-    // TODO: Show details in a modal
-    alert(`Resumo do Empréstimo #${loan.id}:\n` +
-          `Valor original: ${this.calculationsService.getCurrencySymbol(loan.currencyType)} ${loan.purchaseValue.toFixed(2)}\n` +
-          `Valor em R$: ${this.calculationsService.formatCurrency(summary.valueInBRL)}\n` +
-          `Prazo: ${summary.months} meses\n` +
-          `Juros: ${summary.interestRate}% a.a.\n` +
-          `Valor final: ${this.calculationsService.formatCurrency(summary.finalAmount)}\n` +
-          `Total de juros: ${this.calculationsService.formatCurrency(summary.totalInterest)}`);
-  }
-
-
-
   //FIXME - Implementar
   getConvertedValue(loan: LoanInterface): number {
     return 0
    // return this.calculationsService.convertCurrency(loan.purchaseValue, loan.currencyType, this.exchangeRates);
   }
 
+  //FIXME - Implementar
   calculateMonthsDifference(startDate: Date | string, endDate: Date | string): number {
-    return this.calculationsService.calculateMonthsDifference(startDate, endDate);
+    return 0
+    //return this.calculationsService.calculateMonthsDifference(startDate, endDate);
   }
 
+  //FIXME - Implementar
   calculateFinalAmount(loan: LoanInterface, interestRate = 5): number {
-    const months = this.calculateMonthsDifference(loan.purchaseDate, loan.dueDate);
-    const conversionRate = this.exchangeRates[loan.currencyType] || 1;
-    return this.calculationsService.calculateFinalAmount(loan.purchaseValue, conversionRate, months, interestRate);
+    return 0
+    // const months = this.calculateMonthsDifference(loan.purchaseDate, loan.dueDate);
+    // const conversionRate = this.exchangeRates[loan.currencyType] || 1;
+    // return this.calculationsService.calculateFinalAmount(loan.purchaseValue, conversionRate, months, interestRate);
   }
 
+  // FIXME - Implementar
   getCurrencySymbol(currency: CurrencyType): string {
-    return this.calculationsService.getCurrencySymbol(currency);
+    return 'R$'
+    //return this.calculationsService.getCurrencySymbol(currency);
   }
 }
