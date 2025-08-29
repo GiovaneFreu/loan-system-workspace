@@ -24,8 +24,8 @@ export default [
           style: 'kebab-case',
         },
       ],
+      '@angular-eslint/prefer-standalone': 'off',
     },
-    '@angular-eslint/prefer-standalone': false,
   },
   {
     files: ['**/*.html'],
