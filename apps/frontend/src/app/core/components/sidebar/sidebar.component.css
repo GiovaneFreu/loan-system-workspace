@@ -11,5 +11,5 @@ a:not(.inactive){
 }
 
 svg {
-  @apply w-6 h-6 mr-3 fill-none stroke-current;
+  @apply  mr-3 fill-none stroke-current;
 }
