@@ -1,6 +1,8 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy, computed, model } from '@angular/core';
 import { ClientInterface } from '@loan-system-workspace/interfaces';
+import { Subscription } from 'rxjs';
+import { ClientsService } from '../../services';
+import { NotificationService } from '../../../../core/services';
 
 @Component({
   selector: 'app-clients-list',
@@ -8,92 +10,79 @@ import { ClientInterface } from '@loan-system-workspace/interfaces';
   templateUrl: './clients-list.component.html',
   styleUrl: './clients-list.component.css'
 })
-export class ClientsListComponent implements OnInit {
+export class ClientsListComponent implements OnInit, OnDestroy {
+  protected readonly clientsService = inject(ClientsService);
+  protected readonly notificationService = inject(NotificationService);
+
   protected readonly title = 'Gerenciar Clientes';
+  protected clients: ClientInterface[] = [];
+  protected loading = false;
+  protected showForm = false
+  protected editingClient: ClientInterface | null = null;
 
-  clients: ClientInterface[] = [];
-  filteredClients: ClientInterface[] = [];
-  loading = false;
-  searchTerm = '';
-  showForm = false;
-  editingClient: ClientInterface | null = null;
+  private subscription!:Subscription;
 
-  private http = inject(HttpClient);
+  protected searchTerm = model('')
+  protected readonly filteredClients = computed(()=> {
+    const searchTerm = this.searchTerm()
+    if (!searchTerm) return this.clients
+      return this.clients.filter(client =>
+        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.cpf_cnpj.includes(searchTerm)
+      );
+  })
 
   ngOnInit() {
     this.loadClients();
   }
 
-  loadClients() {
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
+  }
+
+  protected loadClients() {
     this.loading = true;
-    this.http.get<ClientInterface[]>('/api/clients').subscribe({
+    this.subscription = this.clientsService.findAll().subscribe({
       next: (clients) => {
         this.clients = clients;
-        this.filteredClients = clients;
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading clients:', error);
+        this.notificationService.showError('Erro ao carregar clientes', error?.message || 'Erro desconhecido');
         this.loading = false;
       }
-    });
+    })
   }
 
-  filterClients() {
-    if (!this.searchTerm) {
-      this.filteredClients = this.clients;
-    } else {
-      this.filteredClients = this.clients.filter(client =>
-        client.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        client.cpf_cnpj.includes(this.searchTerm)
-      );
-    }
-  }
-
-  openAddForm() {
+  protected  openAddForm() {
     this.showForm = true;
     this.editingClient = null;
   }
 
-  openEditForm(client: ClientInterface) {
+  protected  openEditForm(client: ClientInterface) {
     this.showForm = true;
     this.editingClient = { ...client };
   }
 
-  closeForm() {
+  protected closeForm() {
     this.showForm = false;
     this.editingClient = null;
   }
 
-  onFormSubmitted() {
+  protected  onFormSubmitted() {
     this.closeForm();
     this.loadClients();
   }
 
-  deleteClient(client: ClientInterface) {
+  protected deleteClient(client: ClientInterface) {
+    // TODO - melhorar modal dialog
     if (confirm(`Tem certeza que deseja excluir o cliente ${client.name}?`)) {
-      this.http.delete(`/api/clients/${client.id}`).subscribe({
-        next: () => {
-          this.loadClients();
-        },
+      this.subscription = this.clientsService.deleteById(client.id).subscribe({
+        next: () => this.loadClients(),
         error: (error) => {
-          console.error('Error deleting client:', error);
-          alert('Erro ao excluir cliente');
+          this.notificationService.showError('Erro ao excluir cliente', error?.message || 'Erro desconhecido');
         }
       });
     }
   }
-
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  }
-
-  formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  }
-
-
 }

@@ -78,7 +78,24 @@ jobs:
 
       - name: Deploy to Container Apps
         run: |
+          # Deploy da nova imagem
           az containerapp update \
             --name ${{ env.CONTAINER_APP_NAME }} \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --image ${{ env.ACR_NAME }}.azurecr.io/loan-system:staging-latest
+          
+          # Obter o nome da revisão atual
+          CURRENT_REVISION=$(az containerapp revision list \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --query "[0].name" -o tsv)
+          
+          echo "Current revision: $CURRENT_REVISION"
+          
+          # Reiniciar a revisão para garantir que use a nova imagem
+          az containerapp revision restart \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --revision $CURRENT_REVISION
+          
+          echo "✅ Deploy completed with automatic restart"
