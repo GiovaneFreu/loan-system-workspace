@@ -165,27 +165,4 @@ export class LoanFormComponent implements OnInit {
     return d.toISOString().split('T')[0];
   }
 
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  }
-
-  getCurrencySymbol(currency: CurrencyType): string {
-    const symbols: Record<CurrencyType, string> = {
-      [CurrencyType.BRL]: 'R$',
-      [CurrencyType.USD]: '$',
-      [CurrencyType.EUR]: '€',
-      [CurrencyType.GBP]: '£',
-      [CurrencyType.JPY]: '¥',
-      [CurrencyType.CHF]: 'CHF',
-      [CurrencyType.CAD]: 'C$',
-      [CurrencyType.AUD]: 'A$',
-      [CurrencyType.CNY]: '¥',
-      [CurrencyType.ARS]: '$'
-    };
-
-    return symbols[currency] || currency;
-  }
 }
