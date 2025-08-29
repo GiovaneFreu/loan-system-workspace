@@ -1,7 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy, model, computed } from '@angular/core';
 import { ClientInterface, CurrencyType, LoanInterface } from '@loan-system-workspace/interfaces';
-import { LoanCalculationsService } from '../../../../core/services/loan-calculations.service';
+import { forkJoin, Subscription } from 'rxjs';
+import { LoansService } from '../services';
+import { NotificationService } from '../../../../core/services';
+import { ClientsService } from '../../../clients/services';
 
 @Component({
   selector: 'app-loans-list',
@@ -9,103 +12,92 @@ import { LoanCalculationsService } from '../../../../core/services/loan-calculat
   templateUrl: './loans-list.component.html',
   styleUrl: './loans-list.component.css'
 })
-export class LoansListComponent implements OnInit {
+export class LoansListComponent implements OnInit, OnDestroy {
+  private readonly loansService = inject(LoansService);
+  private readonly clientsService = inject(ClientsService);
+  private readonly notificationService = inject(NotificationService);
+
   protected readonly title = 'Gerenciar Empréstimos';
 
-  loans: LoanInterface[] = [];
-  filteredLoans: LoanInterface[] = [];
-  clients: ClientInterface[] = [];
-  exchangeRates: Record<string, number> = {};
-  loading = false;
-  searchTerm = '';
-  showForm = false;
-  editingLoan: LoanInterface | null = null;
+  private loans: LoanInterface[] = [];
+  private clients: ClientInterface[] = [];
+  protected loading = false;
+  protected showForm = false;
+  protected editingLoan: LoanInterface | null = null;
 
-  private http = inject(HttpClient);
-  private calculationsService = inject(LoanCalculationsService);
+  private subscription!:Subscription;
 
   ngOnInit() {
-    this.loadLoans();
-    this.loadClients();
-    this.loadExchangeRates();
-  }
-
-  loadLoans() {
     this.loading = true;
-    this.http.get<LoanInterface[]>('/api/loans').subscribe({
-      next: (loans) => {
-        this.loans = loans;
-        this.filteredLoans = loans;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading loans:', error);
-        this.loading = false;
-      }
+    this.subscription = forkJoin([
+      this.loadLoans(),
+      this.loadClients()
+    ]).subscribe({
+      next:()=>this.loading = false,
+      error:()=> this.loading = false
+    })
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  protected readonly searchTerm = model('')
+  protected readonly filteredLoans = computed(()=> {
+    const searchTerm = this.searchTerm()
+    if (!searchTerm) return this.loans
+    return this.loans.filter(loan =>
+      loan.client?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loan.currencyType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loan?.id.toString().includes(searchTerm)
+    );
+  })
+
+  protected loadLoans() {
+    return this.loansService.findAll().subscribe({
+      next: (loans) =>this.loans = loans,
+      error: (error) => this.notificationService.showError('Erro ao carregar a lista de empréstimos', error?.message || 'Erro desconhecido')
     });
   }
 
-  loadClients() {
-    this.http.get<ClientInterface[]>('/api/clients').subscribe({
-      next: (clients) => {
-        this.clients = clients;
-      },
-      error: (error) => console.error('Error loading clients:', error)
+  protected loadClients() {
+    return this.clientsService.findAll().subscribe({
+      next: (clients) => this.clients = clients,
+      error: (error) => this.notificationService.showError('Erro ao carregar clientes', error?.message || 'Erro desconhecido')
     });
   }
 
-  loadExchangeRates() {
-    this.http.get<Record<string, number>>('/api/loans/exchange-rates').subscribe({
-      next: (rates) => {
-        this.exchangeRates = rates;
-      },
-      error: (error) => console.error('Error loading exchange rates:', error)
-    });
-  }
-
-  filterLoans() {
-    if (!this.searchTerm) {
-      this.filteredLoans = this.loans;
-    } else {
-      this.filteredLoans = this.loans.filter(loan =>
-        loan.client?.name?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        loan.currencyType.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        loan.id.toString().includes(this.searchTerm)
-      );
-    }
-  }
-
-  openAddForm() {
+  //TODO - redundante com clients, ver para usar herança
+  protected openAddForm() {
     this.showForm = true;
     this.editingLoan = null;
   }
 
-  openEditForm(loan: LoanInterface) {
+  //TODO - redundante com clients, ver para usar hernça
+  protected openEditForm(loan: LoanInterface) {
     this.showForm = true;
     this.editingLoan = { ...loan };
   }
 
-  closeForm() {
+  //TODO - redundante com clients, ver para usar herança
+  protected closeForm() {
     this.showForm = false;
     this.editingLoan = null;
   }
 
-  onFormSubmitted() {
+  //TODO - redundante com clients, ver para usar herança
+  protected onFormSubmitted() {
     this.closeForm();
     this.loadLoans();
   }
 
-  deleteLoan(loan: LoanInterface) {
+  protected deleteLoan(loan: LoanInterface) {
+    // TODO - melhorar para modal dialog
     if (confirm(`Tem certeza que deseja excluir o empréstimo #${loan.id}?`)) {
-      this.http.delete(`/api/loans/${loan.id}`).subscribe({
-        next: () => {
-          this.loadLoans();
-        },
-        error: (error) => {
-          console.error('Error deleting loan:', error);
-          alert('Erro ao excluir empréstimo');
-        }
-      });
+      this.subscription = this.loansService.deleteById(loan.id).subscribe({
+        next: () => this.loadLoans(),
+        error: (error) => this.notificationService.showError('Erro ao excluir cliente', error?.message || 'Erro desconhecido')
+      })
     }
   }
 
@@ -125,16 +117,12 @@ export class LoansListComponent implements OnInit {
           `Total de juros: ${this.calculationsService.formatCurrency(summary.totalInterest)}`);
   }
 
-  formatCurrency(value: number, currency: CurrencyType = CurrencyType.BRL): string {
-    return this.calculationsService.formatCurrency(value, currency);
-  }
 
-  formatDate(dateString: string | Date): string {
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  }
 
+  //FIXME - Implementar
   getConvertedValue(loan: LoanInterface): number {
-    return this.calculationsService.convertCurrency(loan.purchaseValue, loan.currencyType, this.exchangeRates);
+    return 0
+   // return this.calculationsService.convertCurrency(loan.purchaseValue, loan.currencyType, this.exchangeRates);
   }
 
   calculateMonthsDifference(startDate: Date | string, endDate: Date | string): number {

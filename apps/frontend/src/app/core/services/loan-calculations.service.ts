@@ -9,10 +9,10 @@ export class LoanCalculationsService {
   calculateMonthsDifference(startDate: Date | string, endDate: Date | string): number {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     let months = (end.getFullYear() - start.getFullYear()) * 12;
     months += end.getMonth() - start.getMonth();
-    
+
     return months > 0 ? months : 0;
   }
 
@@ -23,11 +23,11 @@ export class LoanCalculationsService {
     compoundingFrequency: number = 12
   ): number {
     if (months === 0) return principal;
-    
+
     const rate = annualRate / 100;
     const n = compoundingFrequency;
     const t = months / 12;
-    
+
     return principal * Math.pow(1 + rate / n, n * t);
   }
 
@@ -45,7 +45,7 @@ export class LoanCalculationsService {
     if (fromCurrency === CurrencyType.BRL) {
       return value;
     }
-    
+
     const rate = exchangeRates[fromCurrency] || 1;
     return value * rate;
   }
@@ -53,7 +53,7 @@ export class LoanCalculationsService {
   formatCurrency(value: number, currency: CurrencyType = CurrencyType.BRL): string {
     const locale = currency === CurrencyType.BRL ? 'pt-BR' : 'en-US';
     const currencyCode = currency === CurrencyType.BRL ? 'BRL' : currency;
-    
+
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currencyCode
@@ -81,7 +81,7 @@ export class LoanCalculationsService {
       [CurrencyType.CNY]: '¥',
       [CurrencyType.ARS]: '$'
     };
-    
+
     return symbols[currency] || currency;
   }
 
@@ -115,5 +115,9 @@ export class LoanCalculationsService {
   private calculateEffectiveRate(nominalRate: number, compoundingFrequency: number): number {
     const rate = nominalRate / 100;
     return (Math.pow(1 + rate / compoundingFrequency, compoundingFrequency) - 1) * 100;
+  }
+
+  findAll() {
+
   }
 }
