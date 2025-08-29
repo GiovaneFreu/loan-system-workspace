@@ -85,12 +85,12 @@
 
                 <!-- Data Empréstimo -->
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  {{loan.purchaseDate | date: 'short'}}
+                  {{loan.purchaseDate | date: 'shortDate'}}
                 </td>
 
                 <!-- Vencimento -->
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  {{loan.dueDate | date: 'short'}}
+                  {{loan.dueDate | date: 'shortDate'}}
                 </td>
 
                 <!-- Prazo -->
@@ -103,7 +103,7 @@
                 <!-- Valor Final -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-green-600">
-                    {{ (calculateFinalAmount(loan)) | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR'}}
+                    {{ (calculateFinalAmount(loan)) | currency: 'BRL' : 'symbol' : '1.2-2' }}
                   </div>
                   <div class="text-xs text-gray-500">5% a.a.</div>
                 </td>
