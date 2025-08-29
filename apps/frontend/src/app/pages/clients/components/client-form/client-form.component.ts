@@ -1,6 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject, OnDestroy } from '@angular/core';
 import { ClientInterface } from '@loan-system-workspace/interfaces';
+import { ClientsService } from '../../services';
+import { Subscription } from 'rxjs';
+import { NotificationService } from '../../../../core/services';
 
 @Component({
   selector: 'app-client-form',
@@ -8,22 +11,25 @@ import { ClientInterface } from '@loan-system-workspace/interfaces';
   templateUrl: './client-form.component.html',
   styleUrl: './client-form.component.css'
 })
-export class ClientFormComponent implements OnInit {
+export class ClientFormComponent implements OnInit, OnDestroy{
+  private readonly clientService = inject(ClientsService);
+  private readonly notificationService = inject(NotificationService);
+
   @Input() client: ClientInterface | null = null;
   @Output() submitted = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
-  formData = {
+  protected formData = {
     name: '',
     birthDate: '',
     cpf_cnpj: '',
     monthlyIncome: 0
   };
 
-  loading = false;
-  errors: any = {};
+  protected loading = false;
+  protected errors: any = {};
 
-  private http = inject(HttpClient);
+  private subscription!:Subscription;
 
   ngOnInit() {
     if (this.client) {
@@ -34,6 +40,10 @@ export class ClientFormComponent implements OnInit {
         monthlyIncome: this.client.monthlyIncome
       };
     }
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
   }
 
   get isEditing(): boolean {
@@ -51,20 +61,20 @@ export class ClientFormComponent implements OnInit {
 
       const clientData = {
         ...this.formData,
-        birthDate: new Date(this.formData.birthDate).toISOString()
+        birthDate: new Date(this.formData.birthDate)
       };
 
       const request = this.isEditing
-        ? this.http.put(`/api/clients/${this.client!.id}`, clientData)
-        : this.http.post('/api/clients', clientData);
+        ? this.clientService.update(this.client!.id,clientData)
+        : this.clientService.create(clientData);
 
       request.subscribe({
         next: () => {
           this.loading = false;
+          this.notificationService.showSuccess(`Cliente ${this.isEditing ? 'alterado' : 'criado'} com sucesso!`);
           this.submitted.emit();
         },
         error: (error) => {
-          console.error('Error saving client:', error);
           this.loading = false;
 
           if (error.error?.message) {
@@ -112,7 +122,7 @@ export class ClientFormComponent implements OnInit {
   }
 
   private validateCpfCnpj(value: string): boolean {
-    // Remove caracteres especiais
+    // Remove characters especial
     const cleanValue = value.replace(/\D/g, '');
 
     // Verifica se tem 11 dígitos (CPF) ou 14 dígitos (CNPJ)
@@ -124,7 +134,7 @@ export class ClientFormComponent implements OnInit {
     return d.toISOString().split('T')[0];
   }
 
-  formatCpfCnpj() {
+  protected formatCpfCnpj() {
     let value = this.formData.cpf_cnpj.replace(/\D/g, '');
 
     if (value.length <= 11) {
