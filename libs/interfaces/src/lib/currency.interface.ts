@@ -1,5 +1,4 @@
-export interface CurrencyInerface {
+export interface CurrencyInterface {
   name: string;
   symbol: string;
-  icon:string;
 }

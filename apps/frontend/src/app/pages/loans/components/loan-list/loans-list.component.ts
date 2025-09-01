@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, OnDestroy, model, computed } from '@angular/core';
-import { ClientInterface, CurrencyType, LoanInterface } from '@loan-system-workspace/interfaces';
+import { ClientInterface, LoanInterface } from '@loan-system-workspace/interfaces';
 import { forkJoin, Subscription, map, catchError } from 'rxjs';
-import { LoansService } from '../services';
+import { LoansService } from '../../services';
 import { ClientsService } from '../../../clients/services';
 import { NotificationService } from '../../../../core/services';
 
@@ -47,7 +47,7 @@ export class LoansListComponent implements OnInit, OnDestroy {
     if (!searchTerm) return this.loans
     return this.loans.filter(loan =>
       loan.client?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loan.currency?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loan.currency.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       loan?.id.toString().includes(searchTerm)
     );
   })
@@ -107,12 +107,6 @@ export class LoansListComponent implements OnInit, OnDestroy {
   }
 
   //FIXME - Implementar
-  getConvertedValue(loan: LoanInterface): number {
-    return 0
-   // return this.calculationsService.convertCurrency(loan.purchaseValue, loan.currencyType, this.exchangeRates);
-  }
-
-  //FIXME - Implementar
   calculateMonthsDifference(startDate: Date | string, endDate: Date | string): number {
     return 0
     //return this.calculationsService.calculateMonthsDifference(startDate, endDate);
@@ -126,9 +120,4 @@ export class LoansListComponent implements OnInit, OnDestroy {
     // return this.calculationsService.calculateFinalAmount(loan.purchaseValue, conversionRate, months, interestRate);
   }
 
-  // FIXME - Implementar
-  getCurrencySymbol(currency: CurrencyType): string {
-    return 'R$'
-    //return this.calculationsService.getCurrencySymbol(currency);
-  }
 }

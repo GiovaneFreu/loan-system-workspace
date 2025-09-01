@@ -6,7 +6,6 @@ import { LoanInterface } from '@loan-system-workspace/interfaces';
 export class LoansService {
 
   private readonly http = inject(HttpClient);
-
   private readonly apiUrl = '/api/loans';
 
   findAll() {
@@ -20,7 +19,7 @@ export class LoansService {
   create(loanData: Omit<LoanInterface, 'id'>) {
     return this.http.post<void>(this.apiUrl, loanData);
   }
-  
+
   update(id: number, loanData: Omit<LoanInterface, 'id'>) {
     return this.http.put<void>(`${this.apiUrl}/${id}`, loanData);
   }

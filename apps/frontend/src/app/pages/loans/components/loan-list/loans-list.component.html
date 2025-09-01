@@ -78,7 +78,7 @@
                 <!-- Valor Original -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-300">
-                    {{getCurrencySymbol(loan.currency)}} {{loan.purchaseValue | number:'1.2-2'}}
+                    {{loan.purchaseValue | number:'1.2-2'}}
                   </div>
                   <div class="text-xs text-gray-500">{{loan.currency}}</div>
                 </td>
@@ -165,8 +165,8 @@
 
 <!-- Loan Form Modal -->
 @if(showForm){
-<div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-  <div class="relative top-10 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+<div class="fixed inset-0 py-10 bg-gray-600 bg-opacity-50 overflow-y-hidden h-full w-full z-50">
+  <div class="relative top-40 mx-auto  w-1/2 shadow-lg rounded-md ">
     <app-loan-form
       [loan]="editingLoan"
       [clients]="clients"

@@ -1,22 +1,17 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { ClientInterface, CurrencyInerface, LoanInterface } from '@loan-system-workspace/interfaces';
+import { Component, EventEmitter, inject, Input, OnInit, Output, Signal, signal } from '@angular/core';
+import { ClientInterface, CurrencyInterface, LoanInterface } from '@loan-system-workspace/interfaces';
 import { CurrencyService, NotificationService } from '../../../../core/services';
 import { formatDateForInput } from '../../../../helpers';
-import { LoansService } from '../services';
-
-interface FormData {
-  purchaseDate: string;
-  currency: CurrencyInerface | null;
-  purchaseValue: number;
-  dueDate: string;
-  client : Pick<ClientInterface,'id' | 'name'> | null
-}
+import { LoansService } from '../../services';
+import { differenceInMonths } from 'date-fns';
+import { LoanFormState } from './loan-form.state';
 
 @Component({
   selector: 'app-loan-form',
   standalone: false,
   templateUrl: './loan-form.component.html',
-  styleUrl: './loan-form.component.css'
+  styleUrl: './loan-form.component.css',
+  providers: [LoanFormState]
 })
 export class LoanFormComponent implements OnInit {
   private readonly currenciesService = inject(CurrencyService)
@@ -29,36 +24,33 @@ export class LoanFormComponent implements OnInit {
   @Output() submitted = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
-  formData: FormData = {
-    purchaseDate: '',
-    currency: null,
-    purchaseValue: 0,
-    dueDate: '',
-    client: null
-  };
+  protected readonly form = inject(LoanFormState).form
 
-  loading = false;
-  errors: any = {};
+  protected loadingSubmission = false;
+  protected loadingQuote = false;
+  protected errors: any = {};
+
+  protected currencyQuote = 0
 
   protected  get avaliableCurrencies(){
     return this.currenciesService.avaliableCurrencies
   }
 
-  //FIXME - IMPLEMENTAR
-  protected  get monthsDifference(){
-    return 1
-  }
-
   ngOnInit() {
     if (this.loan) {
-      this.formData = {
-        purchaseDate: formatDateForInput(this.loan.purchaseDate),
-        currency: null,
-        purchaseValue: this.loan.purchaseValue,
-        dueDate: formatDateForInput(this.loan.dueDate),
-        client: this.loan.client
-      };
+        const { purchaseDate, dueDate, purchaseValue, currency, client } = this.loan;
+        this.form.patchValue({
+          dueDate: formatDateForInput(dueDate),
+          purchaseDate: formatDateForInput(purchaseDate),
+          purchaseValue,
+          currency,
+          client
+        })
+      }
     }
+
+  protected getCurrencyQuote(){
+    this.loadingQuote = true
   }
 
   protected  get isEditing(): boolean {
@@ -71,20 +63,17 @@ export class LoanFormComponent implements OnInit {
 
   onSubmit() {
     if (this.validateForm()) {
-      this.loading = true;
+      this.loadingSubmission = true;
       this.errors = {};
 
+      const value = this.form.value
+
       const loanData:Omit<LoanInterface, 'id'> = {
-        purchaseDate: new Date(this.formData.purchaseDate),
-        currency: this.formData.currency as CurrencyInerface,
-        purchaseValue: this.formData.purchaseValue,
-        dueDate: new Date(this.formData.dueDate),
-        client: this.formData.client as ClientInterface,
-        //TODO - AJUSTAR FUNCAO,
-        interestRate:1,
-        conversionRate:1,
-        finalAmount: 1,
-        monthsCount:1
+        purchaseDate: new Date(value.purchaseDate!),
+        currency: value.currency as CurrencyInterface,
+        purchaseValue: value.purchaseValue!,
+        dueDate: new Date(value.dueDate!),
+        client: value.client as ClientInterface,
       };
 
       const request = this.isEditing
@@ -94,12 +83,12 @@ export class LoanFormComponent implements OnInit {
       request.subscribe({
         next: () => {
           this.notificationService.showSuccess('Empréstimo ' + (this.isEditing ? 'alterado' : 'criado') + ' com sucesso!')
-          this.loading = false;
+          this.loadingSubmission = false;
           this.submitted.emit();
         },
         error: (error: { error: { message: 'string'; }; }) => {
           this.notificationService.showError('Erro ao' + (this.isEditing ? 'alterar' : 'criar')+ 'empréstimo.', (error.error?.message || 'Erro desconhecido'))
-          this.loading = false;
+          this.loadingSubmission = false;
         }
       });
     }
@@ -113,19 +102,19 @@ export class LoanFormComponent implements OnInit {
     this.errors = {};
     let isValid = true;
 
-    if (!this.formData.purchaseDate) {
+    if (!this.form.value.purchaseDate) {
       this.errors.purchaseDate = 'Data do empréstimo é obrigatória';
       isValid = false;
     }
 
-    if (!this.formData.dueDate) {
+    if (!this.form.value.dueDate) {
       this.errors.dueDate = 'Data de vencimento é obrigatória';
       isValid = false;
     }
 
-    if (this.formData.purchaseDate && this.formData.dueDate) {
-      const purchaseDate = new Date(this.formData.purchaseDate);
-      const dueDate = new Date(this.formData.dueDate);
+    if (this.form.value.purchaseDate && this.form.value.dueDate) {
+      const purchaseDate = new Date(this.form.value.purchaseDate);
+      const dueDate = new Date(this.form.value.dueDate);
 
       if (dueDate <= purchaseDate) {
         this.errors.dueDate = 'Data de vencimento deve ser posterior à data do empréstimo';
@@ -133,16 +122,25 @@ export class LoanFormComponent implements OnInit {
       }
     }
 
-    if (this.formData.purchaseValue <= 0) {
+    if (!this.form.value.purchaseValue || this.form.value.purchaseValue <= 0) {
       this.errors.purchaseValue = 'Valor deve ser maior que zero';
       isValid = false;
     }
 
-    if (!this.formData.client?.id) {
+    if (!this.form.value.client?.id) {
       this.errors.clientId = 'Cliente é obrigatório';
       isValid = false;
     }
 
     return isValid;
+  }
+
+  protected  monthsDifference(){
+    const startDate = this.form.value.purchaseDate
+    if(!startDate) return 0
+    const endDate = this.form.value.dueDate
+    if(!endDate) return 0
+    const months = differenceInMonths(new Date(endDate), new Date(startDate));
+    return isNaN(months) ? 0 : months;
   }
 }

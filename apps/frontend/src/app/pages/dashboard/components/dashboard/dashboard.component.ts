@@ -1,6 +1,5 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { DashboardInterface, LoanInterface } from '@loan-system-workspace/interfaces';
+import { Component, inject, OnDestroy } from '@angular/core';
+import { DashboardInterface } from '@loan-system-workspace/interfaces';
 import { DashboardService } from '../../services';
 import { NotificationService } from '../../../../core/services/notification.service';
 

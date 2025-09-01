@@ -1,4 +1,4 @@
-import { CurrencyInerface, LoanInterface } from '@loan-system-workspace/interfaces';
+import { CurrencyInterface, LoanInterface } from '@loan-system-workspace/interfaces';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Client } from '../../clients/entities/client.entity';
 
@@ -11,7 +11,7 @@ export class Loan implements Omit<LoanInterface,'currency'> {
   purchaseDate: Date;
 
   @Column({ type: "varchar", length: 3, nullable: false })
-  currencyType: CurrencyInerface['symbol'];
+  currencyType: CurrencyInterface['symbol'];
 
   @Column({ type: "float", scale: 2, nullable: false })
   purchaseValue: number;

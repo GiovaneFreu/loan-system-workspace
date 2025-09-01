@@ -1,6 +1,6 @@
 import { IsDateString, IsNumber, IsPositive } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ClientInterface, CurrencyInerface, LoanInterface } from '@loan-system-workspace/interfaces';
+import { ClientInterface, CurrencyInterface, LoanInterface } from '@loan-system-workspace/interfaces';
 
 //TODO - REVISAR VALIDACAO
 export class CreateLoanDto implements Omit<LoanInterface, 'id'> {
@@ -15,7 +15,7 @@ export class CreateLoanDto implements Omit<LoanInterface, 'id'> {
   @IsDateString()
   dueDate: Date;
 
-  currency: CurrencyInerface;
+  currency: CurrencyInterface;
   client: ClientInterface;
   finalAmount: number;
   monthsCount: number;

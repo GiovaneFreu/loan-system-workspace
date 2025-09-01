@@ -1,4 +1,4 @@
-<div class="bg-slate-800">
+<div class="h-full w-full flex flex-col bg-slate-800 rounded-xl overflow-hidden">
   <!-- Header -->
   <div class="flex items-center justify-between p-6 border-b border-slate-700">
     <h3 class="text-lg font-medium text-white">{{title}}</h3>
@@ -12,7 +12,7 @@
   </div>
 
   <!-- Form -->
-  <form (ngSubmit)="onSubmit()" class="p-6 space-y-6">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-6 space-y-6">
     <!-- General Error -->
     @if(errors.general){
       <div  class="bg-red-900 bg-opacity-50 border border-red-600 rounded-md p-4">
@@ -27,19 +27,18 @@
       </div>
     }
 
-
     <!-- Cliente -->
     <div>
       <label for="clientId" class="block text-sm font-medium text-gray-300 mb-2">Cliente *</label>
       <select
         id="clientId"
-        [(ngModel)]="formData.client"
+        formControlName="client"
         name="clientId"
         class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
         [class.border-red-600]="errors.clientId">
-        <option value="0">Selecione um cliente</option>
-        @for (client of clients; track client.id){
-          <option [value]="{id: client.id}">
+        <option [value]=null>Selecione um cliente</option>
+        @for (client of clients; track client){
+          <option [ngValue]="client">
             #{{client.id}} | {{client.name}} | ({{client.cpf_cnpj}})
           </option>
         }
@@ -48,83 +47,111 @@
       <p class="mt-1 text-sm text-red-300">{{errors.clientId}}</p>
       }
     </div>
+      <!--loan info-->
+      <div class="w-full flex md:flex-row md:space-x-4">
+        <!-- Data do Empréstimo -->
+        <div class="w-48 flex-shrink-0">
+          <label for="purchaseDate" class="block text-sm font-medium text-gray-300 mb-2">Data do Empréstimo *</label>
+          <input
+            id="purchaseDate"
+            type="date"
+            formControlName="purchaseDate"
+            name="purchaseDate"
+            class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
+            [class.border-red-600]="errors.purchaseDate">
+          @if(errors.purchaseDate){
+            <p  class="mt-1 text-sm text-red-300">{{errors.purchaseDate}}</p>
+          }
+        </div>
 
-    <!-- Data do Empréstimo -->
-    <div>
-      <label for="purchaseDate" class="block text-sm font-medium text-gray-300 mb-2">Data do Empréstimo *</label>
-      <input
-        id="purchaseDate"
-        type="date"
-        [(ngModel)]="formData.purchaseDate"
-        name="purchaseDate"
-        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
-        [class.border-red-600]="errors.purchaseDate">
-      @if(errors.purchaseDate){
-      <p  class="mt-1 text-sm text-red-300">{{errors.purchaseDate}}</p>
-      }
+        <!-- Data de Vencimento -->
+        <div class="w-48 flex-shrink-0">
+          <label for="dueDate" class="block text-sm font-medium text-gray-300 mb-2">Data de Vencimento *</label>
+          <input
+            id="dueDate"
+            type="date"
+            formControlName="dueDate"
+            name="dueDate"
+            class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
+            [class.border-red-600]="errors.dueDate">
+          @if(errors.dueDate){
+            <p class="mt-1 text-sm text-red-300">{{errors.dueDate}}</p>
+          }
+        </div>
+
+        <!-- Moeda -->
+        <div>
+          <label for="currencyType" class="block text-sm font-medium text-gray-300 mb-2">Moeda *</label>
+          <select
+            id="currencyType"
+            formControlName="currency"
+            name="currencyType"
+            class="w-full px-3 py-[0.650rem] bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white">
+            @for (currency of avaliableCurrencies; track currency){
+              <option [ngValue]="currency">
+                {{currency.symbol}} | {{currency.name}}
+              </option>
+              )
+            }
+          </select>
+        </div>
+
+        <!-- Valor -->
+        <div>
+          <label for="purchaseValue" class="block text-sm font-medium text-gray-300 mb-2">
+            Valor Obtido*
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-2.5 text-gray-400">{{form.value.currency?.symbol}}</span>
+            <input
+              id="purchaseValue"
+              type="number"
+              formControlName="purchaseValue"
+              name="purchaseValue"
+              step="0.01"
+              min="0"
+              class="w-full pl-14 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white placeholder-gray-400"
+              [class.border-red-600]="errors.purchaseValue"
+              placeholder="0,00">
+          </div>
+          @if(errors.purchaseValue){
+            <p class="mt-1 text-sm text-red-300">{{errors.purchaseValue}}</p>
+          }
+        </div>
+      </div>
+  </form>
+
+  @if(!loadingQuote){
+  <div class="flex flex-col gap-2 p-6 h-full">
+    <label for="loanResume" class="block text-xl font-extrabold  text-gray-300 mb-2">** Resumo do empréstimo **</label>
+    <div class="w-full flex gap-2 pl-12 items-center">
+      <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Quantidade de Meses:</label>
+      <p  class="text-lg text-gray-300">
+        {{monthsDifference()}}
+      </p>
     </div>
-
-    <!-- Data de Vencimento -->
-    <div>
-      <label for="dueDate" class="block text-sm font-medium text-gray-300 mb-2">Data de Vencimento *</label>
-      <input
-        id="dueDate"
-        type="date"
-        [(ngModel)]="formData.dueDate"
-        name="dueDate"
-        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
-        [class.border-red-600]="errors.dueDate">
-      @if(errors.dueDate){
-      <p class="mt-1 text-sm text-red-300">{{errors.dueDate}}</p>
-      }
-      <p  class="mt-1 text-sm text-gray-400">
-        Prazo: {{monthsDifference}} meses
+    <div class="w-full flex gap-2 pl-12 items-center">
+      <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Cotação na Data do Empréstimo:</label>
+      <p  class="text-lg text-gray-300">
+        {{currencyQuote}}
+      </p>
+    </div>
+    <div class="w-full flex gap-2 pl-12 items-center">
+      <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Valor Total:</label>
+      <p  class="text-lg text-gray-300">
+        {{monthsDifference()}}
       </p>
     </div>
 
-    <!-- Moeda -->
-    <div>
-      <label for="currencyType" class="block text-sm font-medium text-gray-300 mb-2">Moeda *</label>
-      <select
-        id="currencyType"
-        [(ngModel)]="formData.currency"
-        name="currencyType"
-        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white">
-        @for (currency of avaliableCurrencies; track currency){
-        <option [value]="currency">
-          {{currency.icon}} - {{currency.name}}({{ currency.symbol }})
-        </option>
-          )
-        }
-      </select>
+  </div>
+  } @else {
+    <div class="flex h-full justify-center items-start py-12 gap-4">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <label class="text-lg font-semibold text-gray-300">Carregando cotação...</label>
     </div>
-
-    <!-- Valor -->
-    <div>
-      <label for="purchaseValue" class="block text-sm font-medium text-gray-300 mb-2">
-        Valor Obtido *
-        <span class="text-gray-400">({{formData.currency}})</span>
-      </label>
-      <div class="relative">
-        <span class="absolute left-3 top-2 text-gray-400">{{formData.currency}}</span>
-        <input
-          id="purchaseValue"
-          type="number"
-          [(ngModel)]="formData.purchaseValue"
-          name="purchaseValue"
-          step="0.01"
-          min="0"
-          class="w-full pl-10 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white placeholder-gray-400"
-          [class.border-red-600]="errors.purchaseValue"
-          placeholder="0,00">
-      </div>
-      @if(errors.purchaseValue){
-      <p class="mt-1 text-sm text-red-300">{{errors.purchaseValue}}</p>
-      }
-    </div>
-
-    <!-- Buttons -->
-    <div class="flex items-center justify-end space-x-3 pt-4">
+  }
+  <!-- Buttons -->
+  <div class="flex items-center justify-end space-x-3 px-6 py-4">
       <button
         type="button"
         (click)="onCancel()"
@@ -133,15 +160,14 @@
       </button>
       <button
         type="submit"
-        [disabled]="loading"
+        [disabled]="loadingSubmission || loadingQuote"
         class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
-        @if(loading){
+        @if(loadingSubmission){
         <svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
         </svg>
         }
-        {{loading ? 'Salvando...' : (isEditing ? 'Atualizar' : 'Criar Empréstimo')}}
+        {{loadingSubmission ? 'Salvando...' : (isEditing ? 'Atualizar' : 'Criar Empréstimo')}}
       </button>
     </div>
-  </form>
 </div>

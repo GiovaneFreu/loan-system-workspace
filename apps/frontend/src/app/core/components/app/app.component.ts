@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { CurrencyService } from '../../services';
 
 @Component({
   selector: 'app-component',
@@ -10,10 +11,8 @@ import { Component, OnInit } from '@angular/core';
   }
 })
 export class AppComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
+  private readonly currencyService = inject(CurrencyService);
+  ngOnInit(): void {
+    this.currencyService.loadCurrencies();
   }
-
 }
