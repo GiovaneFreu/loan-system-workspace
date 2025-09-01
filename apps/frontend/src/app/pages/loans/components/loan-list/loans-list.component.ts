@@ -47,7 +47,7 @@ export class LoansListComponent implements OnInit, OnDestroy {
     if (!searchTerm) return this.loans
     return this.loans.filter(loan =>
       loan.client?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loan.currencyType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loan.currency?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       loan?.id.toString().includes(searchTerm)
     );
   })

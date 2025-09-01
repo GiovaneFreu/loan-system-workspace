@@ -21,7 +21,6 @@ export const databaseProviders = [
           Client,
           Loan,
         ],
-        synchronize: true,
         ssl: configService.get<boolean>('DATABASE_SSL') ? { rejectUnauthorized: false } : false,
       });
 

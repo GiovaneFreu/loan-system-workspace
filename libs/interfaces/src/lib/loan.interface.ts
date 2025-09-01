@@ -1,15 +1,15 @@
-import { CurrencyType } from './currencyType.enum';
 import { ClientInterface } from './client.interface';
+import { CurrencyInerface } from './currency.interface';
 
 export interface LoanInterface {
   id: number;
   purchaseDate: Date;
-  currencyType: CurrencyType;
+  currency: CurrencyInerface;
   purchaseValue: number;
   dueDate: Date;
-  client: ClientInterface;
+  client:ClientInterface;
   conversionRate?: number;
-  finalAmount?: number;
-  monthsCount?: number;
-  interestRate?: number;
+  finalAmount: number;
+  monthsCount: number;
+  interestRate: number;
 }

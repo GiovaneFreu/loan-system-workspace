@@ -1,6 +1,16 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { ClientInterface, CurrencyType, LoanInterface } from '@loan-system-workspace/interfaces';
+import { ClientInterface, CurrencyInerface, LoanInterface } from '@loan-system-workspace/interfaces';
+import { CurrencyService, NotificationService } from '../../../../core/services';
+import { formatDateForInput } from '../../../../helpers';
+import { LoansService } from '../services';
+
+interface FormData {
+  purchaseDate: string;
+  currency: CurrencyInerface | null;
+  purchaseValue: number;
+  dueDate: string;
+  client : Pick<ClientInterface,'id' | 'name'> | null
+}
 
 @Component({
   selector: 'app-loan-form',
@@ -9,78 +19,54 @@ import { ClientInterface, CurrencyType, LoanInterface } from '@loan-system-works
   styleUrl: './loan-form.component.css'
 })
 export class LoanFormComponent implements OnInit {
+  private readonly currenciesService = inject(CurrencyService)
+  private readonly loansService = inject(LoansService);
+  private readonly notificationService = inject(NotificationService);
+
   @Input() loan: LoanInterface | null = null;
   @Input() clients: ClientInterface[] = [];
   @Input() exchangeRates: Record<string, number> = {};
   @Output() submitted = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
-  formData = {
+  formData: FormData = {
     purchaseDate: '',
-    currencyType: CurrencyType.BRL,
+    currency: null,
     purchaseValue: 0,
     dueDate: '',
-    clientId: 0
+    client: null
   };
 
   loading = false;
   errors: any = {};
-  currencies = Object.values(CurrencyType);
 
-  private http = inject(HttpClient);
+  protected  get avaliableCurrencies(){
+    return this.currenciesService.avaliableCurrencies
+  }
+
+  //FIXME - IMPLEMENTAR
+  protected  get monthsDifference(){
+    return 1
+  }
 
   ngOnInit() {
     if (this.loan) {
       this.formData = {
-        purchaseDate: this.formatDateForInput(this.loan.purchaseDate),
-        currencyType: this.loan.currencyType,
+        purchaseDate: formatDateForInput(this.loan.purchaseDate),
+        currency: null,
         purchaseValue: this.loan.purchaseValue,
-        dueDate: this.formatDateForInput(this.loan.dueDate),
-        clientId: this.loan.client?.id || 0
+        dueDate: formatDateForInput(this.loan.dueDate),
+        client: this.loan.client
       };
     }
   }
 
-  get isEditing(): boolean {
+  protected  get isEditing(): boolean {
     return this.loan !== null;
   }
 
-  get title(): string {
+  protected get title(): string {
     return this.isEditing ? 'Editar Empréstimo' : 'Novo Empréstimo';
-  }
-
-  get convertedValue(): number {
-    if (this.formData.currencyType === CurrencyType.BRL) {
-      return this.formData.purchaseValue;
-    }
-
-    const rate = this.exchangeRates[this.formData.currencyType] || 1;
-    return this.formData.purchaseValue * rate;
-  }
-
-  get monthsDifference(): number {
-    if (!this.formData.purchaseDate || !this.formData.dueDate) {
-      return 0;
-    }
-
-    const start = new Date(this.formData.purchaseDate);
-    const end = new Date(this.formData.dueDate);
-
-    let months = (end.getFullYear() - start.getFullYear()) * 12;
-    months += end.getMonth() - start.getMonth();
-
-    return months > 0 ? months : 0;
-  }
-
-  get finalAmount(): number {
-    const months = this.monthsDifference;
-    const valueInBRL = this.convertedValue;
-    const interestRate = 5; // 5% a.a.
-    const rate = interestRate / 100;
-
-    if (months === 0) return valueInBRL;
-
-    return valueInBRL * Math.pow(1 + rate / 12, months);
   }
 
   onSubmit() {
@@ -88,38 +74,38 @@ export class LoanFormComponent implements OnInit {
       this.loading = true;
       this.errors = {};
 
-      const loanData = {
-        purchaseDate: new Date(this.formData.purchaseDate).toISOString(),
-        currencyType: this.formData.currencyType,
+      const loanData:Omit<LoanInterface, 'id'> = {
+        purchaseDate: new Date(this.formData.purchaseDate),
+        currency: this.formData.currency as CurrencyInerface,
         purchaseValue: this.formData.purchaseValue,
-        dueDate: new Date(this.formData.dueDate).toISOString(),
-        clientId: this.formData.clientId
+        dueDate: new Date(this.formData.dueDate),
+        client: this.formData.client as ClientInterface,
+        //TODO - AJUSTAR FUNCAO,
+        interestRate:1,
+        conversionRate:1,
+        finalAmount: 1,
+        monthsCount:1
       };
 
       const request = this.isEditing
-        ? this.http.put(`/api/loans/${this.loan!.id}`, loanData)
-        : this.http.post('/api/loans', loanData);
+        ? this.loansService.update((this.loan as LoanInterface).id, loanData)
+        : this.loansService.create(loanData);
 
       request.subscribe({
         next: () => {
+          this.notificationService.showSuccess('Empréstimo ' + (this.isEditing ? 'alterado' : 'criado') + ' com sucesso!')
           this.loading = false;
           this.submitted.emit();
         },
-        error: (error) => {
-          console.error('Error saving loan:', error);
+        error: (error: { error: { message: 'string'; }; }) => {
+          this.notificationService.showError('Erro ao' + (this.isEditing ? 'alterar' : 'criar')+ 'empréstimo.', (error.error?.message || 'Erro desconhecido'))
           this.loading = false;
-
-          if (error.error?.message) {
-            this.errors.general = error.error.message;
-          } else {
-            this.errors.general = 'Erro ao salvar empréstimo. Tente novamente.';
-          }
         }
       });
     }
   }
 
-  onCancel() {
+  protected onCancel() {
     this.cancelled.emit();
   }
 
@@ -152,17 +138,11 @@ export class LoanFormComponent implements OnInit {
       isValid = false;
     }
 
-    if (!this.formData.clientId) {
+    if (!this.formData.client?.id) {
       this.errors.clientId = 'Cliente é obrigatório';
       isValid = false;
     }
 
     return isValid;
   }
-
-  private formatDateForInput(date: Date | string): string {
-    const d = new Date(date);
-    return d.toISOString().split('T')[0];
-  }
-
 }

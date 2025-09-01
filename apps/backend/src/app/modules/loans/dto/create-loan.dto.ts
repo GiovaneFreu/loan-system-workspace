@@ -1,13 +1,11 @@
-import { IsDateString, IsEnum, IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
+import { IsDateString, IsNumber, IsPositive } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { CurrencyType } from '@loan-system-workspace/interfaces';
+import { ClientInterface, CurrencyInerface, LoanInterface } from '@loan-system-workspace/interfaces';
 
-export class CreateLoanDto {
+//TODO - REVISAR VALIDACAO
+export class CreateLoanDto implements Omit<LoanInterface, 'id'> {
   @IsDateString()
   purchaseDate: Date;
-
-  @IsEnum(CurrencyType)
-  currencyType: CurrencyType;
 
   @IsNumber()
   @IsPositive()
@@ -17,8 +15,10 @@ export class CreateLoanDto {
   @IsDateString()
   dueDate: Date;
 
-  @IsNumber()
-  @IsNotEmpty()
-  @Transform(({ value }) => parseInt(value))
-  clientId: number;
+  currency: CurrencyInerface;
+  client: ClientInterface;
+  finalAmount: number;
+  monthsCount: number;
+  interestRate: number;
+
 }

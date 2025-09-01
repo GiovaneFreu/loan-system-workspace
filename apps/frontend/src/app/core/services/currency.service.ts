@@ -1,10 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
-export interface Currency {
-  name: string;
-  symbol: string;
-}
+import { CurrencyInerface } from '@loan-system-workspace/interfaces';
 
 interface CentralBankCurrencyResponse {
   "@odata.context": string,
@@ -23,20 +19,25 @@ export class CurrencyService {
 
   private readonly http = inject(HttpClient);
 
-  private avaliableCurrencies: Currency[] = []
+  private _avaliableCurrencies: CurrencyInerface[] = []
 
   constructor() {
     this.getAvaliableCurrencies()
   }
 
-  getAvaliableCurrencies() {
+  get avaliableCurrencies(){
+    return this._avaliableCurrencies
+  }
+
+  private getAvaliableCurrencies() {
     this.http.get<CentralBankCurrencyResponse>(`${this.centralBankUrl}/Moedas`).subscribe({
       next: (response) => {
-        this.avaliableCurrencies = response.value.map(currency => ({
+        this._avaliableCurrencies = response.value.map(currency => ({
           name: currency.nomeFormatado,
-          symbol: currency.simbolo
+          symbol: currency.simbolo,
+          icon:''
         }))
-        alert(this.avaliableCurrencies.length)
+        alert(this._avaliableCurrencies.length)
       },
       error: (error: any) => console.error('Erro ao buscar moedas', error)
     })

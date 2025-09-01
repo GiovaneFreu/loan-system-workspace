@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { provideRouter, Route } from '@angular/router';
 import { LoanFormComponent, LoansListComponent } from './components';
+import { CalcPreview } from './components/calc-preview/calc-preview.component';
 
 const routes:Route[] = [
   {    path: '',    redirectTo:'list', pathMatch: 'full'  },
@@ -16,7 +17,8 @@ const routes:Route[] = [
   ],
   declarations: [
     LoansListComponent,
-    LoanFormComponent
+    LoanFormComponent,
+    CalcPreview
   ],
   providers:[
     provideRouter(routes)

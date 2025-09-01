@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, Input, OnInit, Output, inject, OnDestroy } from '@angular/core';
 import { ClientInterface } from '@loan-system-workspace/interfaces';
 import { ClientsService } from '../../services';
 import { Subscription } from 'rxjs';
 import { NotificationService } from '../../../../core/services';
+import { formatDateForInput, validateCpfCnpj } from '../../../../helpers';
 
 @Component({
   selector: 'app-client-form',
@@ -35,7 +35,7 @@ export class ClientFormComponent implements OnInit, OnDestroy{
     if (this.client) {
       this.formData = {
         name: this.client.name,
-        birthDate: this.formatDateForInput(this.client.birthDate),
+        birthDate: formatDateForInput(this.client.birthDate),
         cpf_cnpj: this.client.cpf_cnpj,
         monthlyIncome: this.client.monthlyIncome
       };
@@ -108,7 +108,7 @@ export class ClientFormComponent implements OnInit, OnDestroy{
     if (!this.formData.cpf_cnpj.trim()) {
       this.errors.cpf_cnpj = 'CPF/CNPJ é obrigatório';
       isValid = false;
-    } else if (!this.validateCpfCnpj(this.formData.cpf_cnpj)) {
+    } else if (!validateCpfCnpj(this.formData.cpf_cnpj)) {
       this.errors.cpf_cnpj = 'CPF/CNPJ inválido';
       isValid = false;
     }
@@ -119,19 +119,6 @@ export class ClientFormComponent implements OnInit, OnDestroy{
     }
 
     return isValid;
-  }
-
-  private validateCpfCnpj(value: string): boolean {
-    // Remove characters especial
-    const cleanValue = value.replace(/\D/g, '');
-
-    // Verifica se tem 11 dígitos (CPF) ou 14 dígitos (CNPJ)
-    return cleanValue.length === 11 || cleanValue.length === 14;
-  }
-
-  private formatDateForInput(date: Date | string): string {
-    const d = new Date(date);
-    return d.toISOString().split('T')[0];
   }
 
   protected formatCpfCnpj() {

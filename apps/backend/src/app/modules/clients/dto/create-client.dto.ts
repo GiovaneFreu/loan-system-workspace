@@ -1,6 +1,7 @@
 import { IsString, IsNotEmpty, IsDateString, IsNumber, IsPositive, Length } from 'class-validator';
 import { Transform } from 'class-transformer';
 
+//TODO - IMPLEMENTAR DEMAIS REGRAS
 export class CreateClientDto {
   @IsString()
   @IsNotEmpty()

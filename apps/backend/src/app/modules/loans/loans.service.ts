@@ -4,7 +4,7 @@ import { DATA_SOURCE } from '../../database/datasource.provider';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import { Loan } from './entities/loan.entity';
-import { LoanCalculationsService } from './loan-calculations.service';
+import { ClientInterface } from '@loan-system-workspace/interfaces';
 
 @Injectable()
 export class LoansService {
@@ -12,16 +12,16 @@ export class LoansService {
 
   constructor(
     @Inject(DATA_SOURCE) private readonly dataSource: DataSource,
-    private readonly calculationsService: LoanCalculationsService
   ) {
     this.loanRepository = this.dataSource.getRepository(Loan);
   }
 
   async create(createLoanDto: CreateLoanDto): Promise<Loan> {
-    const { clientId, ...loanData } = createLoanDto;
+    const { client,currency, ...loanData } = createLoanDto;
     const loan = this.loanRepository.create({
       ...loanData,
-      client: { id: clientId } as any
+      currencyType: currency.symbol,
+      client: { id: client.id } as ClientInterface
     });
     return await this.loanRepository.save(loan);
   }
@@ -63,26 +63,5 @@ export class LoansService {
       where: { client: { id: clientId } },
       relations: ['client']
     });
-  }
-
-  calculateLoanDetails(loan: Loan, conversionRate: number = 1, interestRate: number = 5) {
-    const months = this.calculationsService.calculateMonthsDifference(
-      loan.purchaseDate,
-      loan.dueDate
-    );
-    
-    const finalAmount = this.calculationsService.calculateFinalAmount(
-      loan.purchaseValue,
-      conversionRate,
-      months,
-      interestRate
-    );
-
-    return {
-      monthsCount: months,
-      finalAmount,
-      conversionRate,
-      interestRate
-    };
   }
 }
