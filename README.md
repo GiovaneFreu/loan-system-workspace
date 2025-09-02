@@ -1,82 +1,188 @@
-# LoanSystemWorkspace
+# Loan System Workspace
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+A comprehensive loan management system built with Nx monorepo, Angular, and NestJS.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## About the Project
 
-## Finish your CI setup
+This system provides complete loan management functionality, including:
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/aLiQ37BEZB)
+- **Client Management**: Registration, editing, and querying of clients (CPF/CNPJ)
+- **Loan Management**: Creation, calculation, and tracking of loans
+- **Dashboard**: Metrics visualization and system overview
+- **Financial Calculations**: Interest rates, currency conversion, and installments
 
+## Architecture
 
-## Run tasks
+### Technology Stack
+- **Frontend**: Angular 20+ with standalone components
+- **Backend**: NestJS with TypeORM
+- **Database**: PostgreSQL
+- **Styling**: Tailwind CSS
+- **Monorepo**: Nx Workspace
+- **Containerization**: Docker
 
-To run the dev server for your app, use:
+### Workspace Structure
+```
+apps/
+├── frontend/          # Angular application
+├── frontend-e2e/      # Frontend E2E tests
+├── backend/           # NestJS API
+└── backend-e2e/       # Backend E2E tests
 
-```sh
+libs/
+└── interfaces/        # Shared TypeScript interfaces
+```
+
+## Development
+
+### Prerequisites
+- Node.js 18+
+- Docker and Docker Compose
+- PostgreSQL (or use via Docker)
+
+### Environment Setup
+
+1. Clone the repository
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Configure environment variables in `infrastructure/environments/.env`
+
+4. Start the database:
+```bash
+docker-compose -f infrastructure/docker/docker-compose.yml up postgres -d
+```
+
+### Running the Application
+
+#### Local Development
+```bash
+# Start frontend and backend simultaneously
 npx nx serve frontend
+
+# Or start only the backend
+npx nx serve backend
 ```
 
-To create a production bundle:
+#### With Docker
+```bash
+# Start all services
+docker-compose -f infrastructure/docker/docker-compose.yml up
+```
 
-```sh
+### Production Build
+
+```bash
+# Build frontend
 npx nx build frontend
+
+# Build backend
+npx nx build backend
+
+# Build all projects
+npx nx run-many -t build
 ```
 
-To see all available targets to run for a project, run:
+### Testing
 
-```sh
+```bash
+# Run all tests
+npx nx run-many -t test
+
+# Specific tests
+npx nx test frontend
+npx nx test backend
+npx nx test interfaces
+
+# E2E tests
+npx nx e2e frontend-e2e
+npx nx e2e backend-e2e
+```
+
+### Linting
+
+```bash
+# Lint all projects
+npx nx run-many -t lint
+
+# Specific linting
+npx nx lint frontend
+npx nx lint backend
+```
+
+## Features
+
+### Client Management
+- Registration of individuals (CPF) and companies (CNPJ)
+- Monthly income tracking
+- Loan history per client
+
+### Loan Management
+- Multiple currency types
+- Automatic interest and installment calculations
+- Due date tracking
+- Currency conversion
+
+### Dashboard
+- System metrics
+- Overview of clients and loans
+- Financial indicators
+
+## Database Structure
+
+### Main Entities
+- **Client**: Client data (CPF/CNPJ, income, etc.)
+- **Loan**: Loan information (amount, interest, term, etc.)
+
+### Configuration
+- PostgreSQL on port 5433 (development)
+- TypeORM for ORM
+- Automatic migrations in development
+
+## Useful Scripts
+
+```bash
+# Visualize project dependencies
+npx nx graph
+
+# Information about a specific project
 npx nx show project frontend
+
+# List all projects
+npx nx show projects
+
+# Generate new components/modules
+npx nx g @nx/angular:component my-component --project=frontend
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## Development Environment
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+The system is configured with:
+- Hot reload for development
+- Automatic proxy between frontend and backend
+- pt-BR locale configured
+- ESLint and Prettier for code standardization
 
-## Add new projects
+## Ports
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+- **Frontend**: http://localhost:4200
+- **Backend**: http://localhost:3000
+- **PostgreSQL**: localhost:5433
 
-Use the plugin's generator to create new projects.
+## Contributing
 
-To generate a new application, use:
+To contribute to the project:
 
-```sh
-npx nx g @nx/angular:app demo
-```
+1. Fork the repository
+2. Create a branch for your feature (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -am 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Create a Pull Request
 
-To generate a new library, use:
+## License
 
-```sh
-npx nx g @nx/angular:lib mylib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+This project is under the MIT license.
