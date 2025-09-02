@@ -20,5 +20,6 @@ export class CreateLoanDto implements Omit<LoanInterface, 'id'> {
   finalAmount: number;
   monthsCount: number;
   interestRate: number;
+  conversionRate: number;
 
 }

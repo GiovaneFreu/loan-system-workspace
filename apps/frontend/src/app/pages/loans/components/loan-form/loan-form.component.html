@@ -127,21 +127,22 @@
     <div class="w-full flex gap-2 pl-12 items-center">
       <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Quantidade de Meses:</label>
       <p  class="text-lg text-gray-300">
-        {{monthsDifference()}}
+        {{monthsCount}}
       </p>
     </div>
     <div class="w-full flex gap-2 pl-12 items-center">
       <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Cotação na Data do Empréstimo:</label>
       <p  class="text-lg text-gray-300">
-        {{currencyQuote}}
+        {{conversionRate}}
       </p>
     </div>
     <div class="w-full flex gap-2 pl-12 items-center">
       <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Valor Total:</label>
       <p  class="text-lg text-gray-300">
-        {{monthsDifference()}}
+        {{totalValue}}
       </p>
     </div>
+
 
   </div>
   } @else {

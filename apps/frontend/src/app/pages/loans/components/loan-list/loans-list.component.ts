@@ -41,7 +41,7 @@ export class LoansListComponent implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  protected readonly searchTerm = model('')
+  protected searchTerm = model('')
   protected readonly filteredLoans = computed(()=> {
     const searchTerm = this.searchTerm()
     if (!searchTerm) return this.loans
@@ -105,19 +105,4 @@ export class LoansListComponent implements OnInit, OnDestroy {
       })
     }
   }
-
-  //FIXME - Implementar
-  calculateMonthsDifference(startDate: Date | string, endDate: Date | string): number {
-    return 0
-    //return this.calculationsService.calculateMonthsDifference(startDate, endDate);
-  }
-
-  //FIXME - Implementar
-  calculateFinalAmount(loan: LoanInterface, interestRate = 5): number {
-    return 0
-    // const months = this.calculateMonthsDifference(loan.purchaseDate, loan.dueDate);
-    // const conversionRate = this.exchangeRates[loan.currencyType] || 1;
-    // return this.calculationsService.calculateFinalAmount(loan.purchaseValue, conversionRate, months, interestRate);
-  }
-
 }

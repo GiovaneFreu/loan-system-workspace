@@ -43,10 +43,9 @@
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cliente</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Valor Original</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Valor em R$</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Data Empréstimo</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Vencimento</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Prazo</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Prazo em meses</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Valor Final (R$)</th>
             <th class="relative px-6 py-3"><span class="sr-only">Ações</span></th>
           </tr>
@@ -96,14 +95,14 @@
                 <!-- Prazo -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-300">
-                    {{calculateMonthsDifference(loan.purchaseDate, loan.dueDate)}} meses
+                    {{loan.monthsCount}} meses
                   </div>
                 </td>
 
                 <!-- Valor Final -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-green-600">
-                    {{ (calculateFinalAmount(loan)) | currency: 'BRL' : 'symbol' : '1.2-2' }}
+                    {{ loan.finalAmount | currency: 'BRL' : 'symbol' : '1.2-2' }}
                   </div>
                   <div class="text-xs text-gray-500">5% a.a.</div>
                 </td>

@@ -3,7 +3,6 @@ import { ClientInterface, CurrencyInterface, LoanInterface } from '@loan-system-
 import { CurrencyService, NotificationService } from '../../../../core/services';
 import { formatDateForInput } from '../../../../helpers';
 import { LoansService } from '../../services';
-import { differenceInMonths } from 'date-fns';
 import { LoanFormState } from './loan-form.state';
 
 @Component({
@@ -28,24 +27,38 @@ export class LoanFormComponent implements OnInit {
 
   protected loadingSubmission = false;
   protected loadingQuote = false;
-  protected errors: any = {};
 
-  protected currencyQuote = 0
+  protected get errors() {
+    return this.currenciesService.errors
+  }
 
   protected  get avaliableCurrencies(){
     return this.currenciesService.avaliableCurrencies
+  }
+
+  protected get conversionRate(){
+    return this.form.controls.conversionRate.value
+  }
+
+  protected get monthsCount() {
+    return this.form.controls.monthsCount.value
+  }
+
+  protected get totalValue() {
+    return this.form.controls.finalAmount.value
   }
 
   ngOnInit() {
     if (this.loan) {
         const { purchaseDate, dueDate, purchaseValue, currency, client } = this.loan;
         this.form.patchValue({
+
           dueDate: formatDateForInput(dueDate),
           purchaseDate: formatDateForInput(purchaseDate),
           purchaseValue,
           currency,
           client
-        })
+        },{ emitEvent: false });
       }
     }
 
@@ -62,9 +75,9 @@ export class LoanFormComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.validateForm()) {
+    if(this.errors) return
+
       this.loadingSubmission = true;
-      this.errors = {};
 
       const value = this.form.value
 
@@ -72,6 +85,10 @@ export class LoanFormComponent implements OnInit {
         purchaseDate: new Date(value.purchaseDate!),
         currency: value.currency as CurrencyInterface,
         purchaseValue: value.purchaseValue!,
+        interestRate: value.interestRate!,
+        monthsCount:  value.monthsCount!,
+        finalAmount: value.finalAmount!,
+        conversionRate: value.conversionRate!,
         dueDate: new Date(value.dueDate!),
         client: value.client as ClientInterface,
       };
@@ -91,56 +108,11 @@ export class LoanFormComponent implements OnInit {
           this.loadingSubmission = false;
         }
       });
-    }
   }
 
   protected onCancel() {
     this.cancelled.emit();
   }
 
-  private validateForm(): boolean {
-    this.errors = {};
-    let isValid = true;
 
-    if (!this.form.value.purchaseDate) {
-      this.errors.purchaseDate = 'Data do empréstimo é obrigatória';
-      isValid = false;
-    }
-
-    if (!this.form.value.dueDate) {
-      this.errors.dueDate = 'Data de vencimento é obrigatória';
-      isValid = false;
-    }
-
-    if (this.form.value.purchaseDate && this.form.value.dueDate) {
-      const purchaseDate = new Date(this.form.value.purchaseDate);
-      const dueDate = new Date(this.form.value.dueDate);
-
-      if (dueDate <= purchaseDate) {
-        this.errors.dueDate = 'Data de vencimento deve ser posterior à data do empréstimo';
-        isValid = false;
-      }
-    }
-
-    if (!this.form.value.purchaseValue || this.form.value.purchaseValue <= 0) {
-      this.errors.purchaseValue = 'Valor deve ser maior que zero';
-      isValid = false;
-    }
-
-    if (!this.form.value.client?.id) {
-      this.errors.clientId = 'Cliente é obrigatório';
-      isValid = false;
-    }
-
-    return isValid;
-  }
-
-  protected  monthsDifference(){
-    const startDate = this.form.value.purchaseDate
-    if(!startDate) return 0
-    const endDate = this.form.value.dueDate
-    if(!endDate) return 0
-    const months = differenceInMonths(new Date(endDate), new Date(startDate));
-    return isNaN(months) ? 0 : months;
-  }
 }

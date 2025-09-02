@@ -19,10 +19,10 @@ interface CentralBackCurrencyQuoteResponse {
   "@odata.context": string,
   value: [
   {
-    paridadeCompra: 0,
-    paridadeVenda: 0,
-    cotacaoCompra: 0,
-    cotacaoVenda: 0,
+    paridadeCompra: number,
+    paridadeVenda: number,
+    cotacaoCompra: number,
+    cotacaoVenda: number,
     dataHoraCotacao: string,
     tipoBoletim: string
   }
@@ -39,6 +39,13 @@ export class CurrencyService implements OnDestroy{
   private _avaliableCurrencies: CurrencyInterface[] = []
   private subscription!:Subscription;
 
+  //FIXME - AJUSTAR TIPAGEM
+  private _errors: any;
+
+  get errors(){
+    return this._errors
+  }
+
   get avaliableCurrencies(){
     return this._avaliableCurrencies
   }
@@ -48,8 +55,8 @@ export class CurrencyService implements OnDestroy{
   }
 
   getCurrencyQuote(currency: CurrencyInterface, date: string) {
-    const url = `${this.centralBankUrl}/CotacaoMoedaDia?moeda=${currency.symbol}&dataCotacao=${date}`
-    return this.http.get<CentralBankCurrencyResponse>(url).pipe(
+    const url = `${this.centralBankUrl}/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='${currency.symbol}'&@dataCotacao='${date.split('-').reverse().join('-')}'`
+    return this.http.get<CentralBackCurrencyQuoteResponse>(url).pipe(
       map(response => response.value.length > 0 ? response.value[response.value.length -1] : null)
     )
   }
