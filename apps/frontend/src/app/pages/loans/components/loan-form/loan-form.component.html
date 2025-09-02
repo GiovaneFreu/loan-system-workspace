@@ -12,21 +12,7 @@
   </div>
 
   <!-- Form -->
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-6 space-y-6">
-    <!-- General Error -->
-    @if(errors.general){
-      <div  class="bg-red-900 bg-opacity-50 border border-red-600 rounded-md p-4">
-        <div class="flex">
-          <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-          </svg>
-          <div class="ml-3">
-            <p class="text-sm text-red-300">{{errors.general}}</p>
-          </div>
-        </div>
-      </div>
-    }
-
+    <form [formGroup]="form" class="p-6 space-y-6">
     <!-- Cliente -->
     <div>
       <label for="clientId" class="block text-sm font-medium text-gray-300 mb-2">Cliente *</label>
@@ -35,7 +21,7 @@
         formControlName="client"
         name="clientId"
         class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
-        [class.border-red-600]="errors.clientId">
+        [class.border-red-600]="form.controls.client.invalid && form.controls.client.touched">
         <option [value]=null>Selecione um cliente</option>
         @for (client of clients; track client){
           <option [ngValue]="client">
@@ -43,8 +29,8 @@
           </option>
         }
       </select>
-      @if(errors.clientId) {
-      <p class="mt-1 text-sm text-red-300">{{errors.clientId}}</p>
+      @if(form.controls.client.invalid && form.controls.client.touched) {
+      <p class="mt-1 text-sm text-red-300">Cliente é obrigatório</p>
       }
     </div>
       <!--loan info-->
@@ -58,9 +44,9 @@
             formControlName="purchaseDate"
             name="purchaseDate"
             class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
-            [class.border-red-600]="errors.purchaseDate">
-          @if(errors.purchaseDate){
-            <p  class="mt-1 text-sm text-red-300">{{errors.purchaseDate}}</p>
+            [class.border-red-600]="form.controls.purchaseDate.invalid && form.controls.purchaseDate.touched">
+          @if(form.controls.purchaseDate.invalid && form.controls.purchaseDate.touched){
+            <p  class="mt-1 text-sm text-red-300">Data de Empréstimo é Obrigatória</p>
           }
         </div>
 
@@ -73,20 +59,26 @@
             formControlName="dueDate"
             name="dueDate"
             class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
-            [class.border-red-600]="errors.dueDate">
-          @if(errors.dueDate){
-            <p class="mt-1 text-sm text-red-300">{{errors.dueDate}}</p>
+            [class.border-red-600]="form.controls.dueDate.invalid && form.controls.dueDate.touched">">
+          @if(form.controls.dueDate.hasError('required') && form.controls.dueDate.touched){
+            <p class="-mt-5 text-sm text-red-300">Data de vencimento é obrigatória</p>
+          }
+          @if(form.controls.monthsCount.invalid && form.controls.dueDate.touched){
+            <p class="-mt-5 text-sm text-red-300">Data de vencimento deve ser no mínimo 30 dias posterior à data do empréstimo.</p>
           }
         </div>
 
         <!-- Moeda -->
-        <div>
+        <div class="w-full">
           <label for="currencyType" class="block text-sm font-medium text-gray-300 mb-2">Moeda *</label>
           <select
             id="currencyType"
             formControlName="currency"
             name="currencyType"
-            class="w-full px-3 py-[0.650rem] bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white">
+            class="w-full px-3 py-[0.650rem] bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
+            [class.border-red-600]="form.controls.currency.invalid && form.controls.currency.touched">
+          >
+
             @for (currency of avaliableCurrencies; track currency){
               <option [ngValue]="currency">
                 {{currency.symbol}} | {{currency.name}}
@@ -94,6 +86,33 @@
               )
             }
           </select>
+          @if(form.controls.currency.hasError('required') && form.controls.currency.touched){
+            <p class="mt-1 text-sm text-red-300">Moeda é obrigatória</p>
+          }
+        </div>
+
+      </div>
+      <div class="w-full flex md:flex-row md:space-x-4">
+        <!-- Interest Rate -->
+        <div class="w-32 flex-shrink-0">
+          <label for="intresteRate" class="block text-sm font-medium text-gray-300 mb-2">
+            Taxa de Juros(%)*
+          </label>
+          <div class="relative">
+            <input
+              id="interestRate"
+              type="number"
+              formControlName="interestRate"
+              name="interestRate"
+              step="0.01"
+              min="0"
+              class="w-full pl-4 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white placeholder-gray-400"
+              [class.border-red-600]="form.controls.interestRate.invalid && form.controls.interestRate.touched"
+              placeholder="0,00">
+          </div>
+          @if(form.controls.interestRate.invalid && form.controls.interestRate.touched){
+            <p class="mt-1 text-sm text-red-300">Valor obtido deve ser maior ou igual a zero</p>
+          }
         </div>
 
         <!-- Valor -->
@@ -111,40 +130,72 @@
               step="0.01"
               min="0"
               class="w-full pl-14 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white placeholder-gray-400"
-              [class.border-red-600]="errors.purchaseValue"
+              [class.border-red-600]="form.controls.purchaseValue.invalid && form.controls.purchaseValue.touched"
               placeholder="0,00">
           </div>
-          @if(errors.purchaseValue){
-            <p class="mt-1 text-sm text-red-300">{{errors.purchaseValue}}</p>
+          @if(form.controls.purchaseValue.invalid && form.controls.purchaseValue.touched){
+            <p class="mt-1 text-sm text-red-300">Valor obtido deve ser maior que zero</p>
           }
         </div>
       </div>
   </form>
 
   @if(!loadingQuote){
-  <div class="flex flex-col gap-2 p-6 h-full">
-    <label for="loanResume" class="block text-xl font-extrabold  text-gray-300 mb-2">** Resumo do empréstimo **</label>
-    <div class="w-full flex gap-2 pl-12 items-center">
-      <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Quantidade de Meses:</label>
-      <p  class="text-lg text-gray-300">
-        {{monthsCount}}
-      </p>
-    </div>
-    <div class="w-full flex gap-2 pl-12 items-center">
-      <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Cotação na Data do Empréstimo:</label>
-      <p  class="text-lg text-gray-300">
-        {{conversionRate}}
-      </p>
-    </div>
-    <div class="w-full flex gap-2 pl-12 items-center">
-      <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Valor Total:</label>
-      <p  class="text-lg text-gray-300">
-        {{totalValue}}
-      </p>
+    @if(form.valid){
+      <div class="p-6 w-full">
+        <div  class="bg-slate-900 bg-opacity-50 border border-slate-600 rounded-md p-4">
+          <div class="flex">
+              <div class="flex flex-col gap-2 p-6 h-full">
+                <label for="loanResume" class="block text-xl font-extrabold  text-gray-300 mb-2">** Resumo do empréstimo **</label>
+                <div class="w-full flex gap-2 pl-12 items-center">
+                  <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Quantidade de Meses:</label>
+                  <p  class="text-lg text-gray-300">
+                    {{monthsCount}}
+                  </p>
+                </div>
+                <div class="w-full flex gap-2 pl-12 items-center">
+                  <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Cotação na Data do Empréstimo:</label>
+                  <p  class="text-lg text-gray-300">
+                    {{conversionRate}}
+                  </p>
+                </div>
+                <div class="w-full flex gap-2 pl-12 items-center">
+                  <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Valor Total final em R$:</label>
+                  <p  class="text-lg text-gray-300">
+                    {{brlValue | currency: 'BRL' : '' : '1.2-2'}}
+                  </p>
+                </div>
+                <div class="w-full flex gap-2 pl-12 items-center">
+                  <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Valor Total final em {{ form.controls.currency.value!.symbol }}:</label>
+                  <p  class="text-lg text-gray-300">
+                    {{totalValue | currency: form.controls.currency.value!.symbol : '' : '1.2-2'}}
+                  </p>
+                </div>
+
+
+              </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <!-- General Error -->
+      <div class="p-6 w-full">
+      <div  class="bg-yellow-900 bg-opacity-50 border border-yellow-600 rounded-md p-4">
+        <div class="flex">
+          <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          </svg>
+          <div class="ml-3">
+            <p class="text-sm text-yellow-300">Preencha todos os dados do formulário para exibir o resumo do empréstimo.</p>
+          </div>
+        </div>
+      </div>
     </div>
 
 
-  </div>
+
+    }
+
   } @else {
     <div class="flex h-full justify-center items-start py-12 gap-4">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -161,7 +212,8 @@
       </button>
       <button
         type="submit"
-        [disabled]="loadingSubmission || loadingQuote"
+        [disabled]="loadingSubmission || loadingQuote || !form.valid"
+        (click)="save()"
         class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
         @if(loadingSubmission){
         <svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">

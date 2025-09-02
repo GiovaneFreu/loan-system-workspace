@@ -19,13 +19,13 @@ export class LoanFormState implements OnDestroy{
   readonly form= this.fb.group({
     purchaseDate: this.fb.control('', Validators.required),
     currency: this.fb.control<CurrencyInterface | null>(null, Validators.required),
-    purchaseValue: this.fb.control(0, Validators.required),
+    purchaseValue: this.fb.control(0, [Validators.required, Validators.min(0.01)]),
     interestRate: this.fb.control(0, Validators.required),
     dueDate: this.fb.control('', Validators.required),
     client: this.fb.control<ClientInterface | null>(null, Validators.required),
     conversionRate: this.fb.control<number |null>(null, Validators.required),
-    finalAmount: this.fb.control<number>(0, Validators.required),
-    monthsCount: this.fb.control(0, Validators.required),
+    finalAmount: this.fb.control<number>(0, [Validators.required, Validators.min(0.01)]),
+    monthsCount: this.fb.control(0, [Validators.required, Validators.min(1)]),
   })
 
   constructor() {
@@ -70,53 +70,14 @@ export class LoanFormState implements OnDestroy{
     })
   }
 
-  private  setMonthsDiference(){
-    const startDate = this.form.value.purchaseDate
-    if(!startDate) return 0
-    const endDate = this.form.value.dueDate
-    if(!endDate) return 0
-    const months = differenceInMonths(new Date(endDate), new Date(startDate));
-    return isNaN(months) ? 0 : months;
-  }
-
   private calcValues() {
-    // private
+    const principal = this.form.controls.purchaseValue.value ?? 0
+    const monthTax = this.form.controls.interestRate.value ? this.form.controls.interestRate.value / 100 : 0
+    const startDate = this.form.controls.purchaseDate.value
+    const endDate = this.form.controls.dueDate.value
+    const period = differenceInMonths(new Date(endDate!), new Date(startDate!));
+    this.form.controls.monthsCount.patchValue(period)
+    const valorFinal =  principal * Math.pow(1 + monthTax, period)
+    this.form.controls.finalAmount.patchValue(valorFinal)
   }
-
-  // private validateForm(): boolean {
-  //   let isValid = true;
-  //
-  //   if (!this.form.value.purchaseDate) {
-  //     this.errors.purchaseDate = 'Data do empréstimo é obrigatória';
-  //     isValid = false;
-  //   }
-  //
-  //   if (!this.form.value.dueDate) {
-  //     this.errors.dueDate = 'Data de vencimento é obrigatória';
-  //     isValid = false;
-  //   }
-  //
-  //   if (this.form.value.purchaseDate && this.form.value.dueDate) {
-  //     const purchaseDate = new Date(this.form.value.purchaseDate);
-  //     const dueDate = new Date(this.form.value.dueDate);
-  //
-  //     if (dueDate <= purchaseDate) {
-  //       this.errors.dueDate = 'Data de vencimento deve ser posterior à data do empréstimo';
-  //       isValid = false;
-  //     }
-  //   }
-  //
-  //   if (!this.form.value.purchaseValue || this.form.value.purchaseValue <= 0) {
-  //     this.errors.purchaseValue = 'Valor deve ser maior que zero';
-  //     isValid = false;
-  //   }
-  //
-  //   if (!this.form.value.client?.id) {
-  //     this.errors.clientId = 'Cliente é obrigatório';
-  //     isValid = false;
-  //   }
-  //
-  //   return isValid;
-  // }
-
 }

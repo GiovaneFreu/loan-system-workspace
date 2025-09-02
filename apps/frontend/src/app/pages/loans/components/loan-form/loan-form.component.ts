@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output, Signal, signal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { ClientInterface, CurrencyInterface, LoanInterface } from '@loan-system-workspace/interfaces';
 import { CurrencyService, NotificationService } from '../../../../core/services';
 import { formatDateForInput } from '../../../../helpers';
@@ -28,16 +28,12 @@ export class LoanFormComponent implements OnInit {
   protected loadingSubmission = false;
   protected loadingQuote = false;
 
-  protected get errors() {
-    return this.currenciesService.errors
-  }
-
   protected  get avaliableCurrencies(){
     return this.currenciesService.avaliableCurrencies
   }
 
   protected get conversionRate(){
-    return this.form.controls.conversionRate.value
+    return this.form.controls.conversionRate.value ?? 0
   }
 
   protected get monthsCount() {
@@ -46,6 +42,10 @@ export class LoanFormComponent implements OnInit {
 
   protected get totalValue() {
     return this.form.controls.finalAmount.value
+  }
+
+  protected get brlValue() {
+    return (this.form.controls.finalAmount.value ?? 0) * this.conversionRate
   }
 
   ngOnInit() {
@@ -74,8 +74,8 @@ export class LoanFormComponent implements OnInit {
     return this.isEditing ? 'Editar Empréstimo' : 'Novo Empréstimo';
   }
 
-  onSubmit() {
-    if(this.errors) return
+  protected save() {
+    if(this.form.invalid) return
 
       this.loadingSubmission = true;
 
