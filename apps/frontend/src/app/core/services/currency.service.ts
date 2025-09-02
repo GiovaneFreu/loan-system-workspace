@@ -1,4 +1,4 @@
-import { inject, Injectable, OnDestroy } from '@angular/core';
+import { inject, Injectable, OnDestroy, Signal, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CurrencyInterface } from '@loan-system-workspace/interfaces';
 import { map, Subscription } from 'rxjs';
@@ -36,7 +36,7 @@ export class CurrencyService implements OnDestroy{
 
   private readonly http = inject(HttpClient);
 
-  private _avaliableCurrencies: CurrencyInterface[] = []
+  private _avaliableCurrencies: Signal<CurrencyInterface[]> = signal([])
   private subscription!:Subscription;
 
   //FIXME - AJUSTAR TIPAGEM
@@ -54,8 +54,8 @@ export class CurrencyService implements OnDestroy{
       this.subscription?.unsubscribe();
   }
 
-  getCurrencyQuote(currency: CurrencyInterface, date: string) {
-    const url = `${this.centralBankUrl}/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='${currency.symbol}'&@dataCotacao='${date.split('-').reverse().join('-')}'`
+  getCurrencyQuote(currencySymbol: CurrencyInterface['symbol'], date: string) {
+    const url = `${this.centralBankUrl}/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='${currencySymbol}'&@dataCotacao='${date.split('-').reverse().join('-')}'`
     return this.http.get<CentralBackCurrencyQuoteResponse>(url).pipe(
       map(response => response.value.length > 0 ? response.value[response.value.length -1] : null)
     )
@@ -64,10 +64,12 @@ export class CurrencyService implements OnDestroy{
   loadCurrencies() {
     this.subscription = this.http.get<CentralBankCurrencyResponse>(`${this.centralBankUrl}/Moedas`).subscribe({
       next: (response) => {
-        this._avaliableCurrencies = response.value.map(currency => ({
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
+        this._avaliableCurrencies.set(response.value.map(currency => ({
           name: currency.nomeFormatado,
           symbol: currency.simbolo,
-        }))
+        })))
       },
       error: (error: any) => this.notificationService.showError('Erro ao carregar moedas', error?.message || 'Erro desconhecido')
     })

@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
 import { LoansService } from './loans.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
+import { ClientInterface, CurrencyInterface, LoanInterface } from '@loan-system-workspace/interfaces';
 
 @Controller('loans')
 export class LoansController {
@@ -15,8 +16,28 @@ export class LoansController {
   }
 
   @Get()
-  findAll() {
-    return this.loansService.findAll();
+  async findAll():Promise<LoanInterface[]> {
+    const loans = await this.loansService.findAll();
+    return loans.map((l)=>{
+      const {currencyType,id,dueDate,client,purchaseDate,purchaseValue,finalAmount,interestRate,conversionRate,monthsCount} = l
+      return {
+       id,
+        dueDate,
+        client:{
+         id: client.id,
+          name:client.name
+        } as ClientInterface,
+        currency:{
+         symbol:currencyType
+        } as CurrencyInterface,
+        purchaseDate,
+        purchaseValue,
+        finalAmount,
+        interestRate,
+        conversionRate,
+        monthsCount: +monthsCount
+      }
+    })
   }
 
 
@@ -30,7 +51,7 @@ export class LoansController {
     return this.loansService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateLoanDto: UpdateLoanDto) {
     return this.loansService.update(+id, updateLoanDto);
   }

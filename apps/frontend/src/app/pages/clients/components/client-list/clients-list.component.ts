@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, OnDestroy, computed, model } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy, computed, model, signal } from '@angular/core';
 import { ClientInterface } from '@loan-system-workspace/interfaces';
 import { Subscription } from 'rxjs';
 import { ClientsService } from '../../services';
@@ -15,7 +15,7 @@ export class ClientsListComponent implements OnInit, OnDestroy {
   protected readonly notificationService = inject(NotificationService);
 
   protected readonly title = 'Gerenciar Clientes';
-  protected clients: ClientInterface[] = [];
+  protected readonly clients = signal<ClientInterface[]>([])
   protected loading = false;
   protected showForm = false
   protected editingClient: ClientInterface | null = null;
@@ -25,8 +25,8 @@ export class ClientsListComponent implements OnInit, OnDestroy {
   protected searchTerm = model('')
   protected readonly filteredClients = computed(()=> {
     const searchTerm = this.searchTerm()
-    if (!searchTerm) return this.clients
-      return this.clients.filter(client =>
+    if (!searchTerm) return this.clients()
+      return this.clients().filter(client =>
         client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.cpf_cnpj.includes(searchTerm)
       );
@@ -44,7 +44,7 @@ export class ClientsListComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.subscription = this.clientsService.findAll().subscribe({
       next: (clients) => {
-        this.clients = clients;
+        this.clients.set(clients)
         this.loading = false;
       },
       error: (error) => {

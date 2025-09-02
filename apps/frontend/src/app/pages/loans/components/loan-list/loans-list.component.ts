@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, OnDestroy, model, computed } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy, model, computed, signal } from '@angular/core';
 import { ClientInterface, LoanInterface } from '@loan-system-workspace/interfaces';
 import { forkJoin, Subscription, map, catchError } from 'rxjs';
 import { LoansService } from '../../services';
 import { ClientsService } from '../../../clients/services';
-import { NotificationService } from '../../../../core/services';
+import { CurrencyService, NotificationService } from '../../../../core/services';
 
 @Component({
   selector: 'app-loans-list',
@@ -15,10 +15,11 @@ export class LoansListComponent implements OnInit, OnDestroy {
   private readonly loansService = inject(LoansService);
   private readonly clientsService = inject(ClientsService);
   private readonly notificationService = inject(NotificationService);
+  private readonly currencyService = inject(CurrencyService);
 
   protected readonly title = 'Gerenciar Empréstimos';
 
-  private loans: LoanInterface[] = [];
+  private readonly  loans = signal<LoanInterface[]>([]);
   protected clients: ClientInterface[] = [];
   protected loading = false;
   protected showForm = false;
@@ -32,7 +33,7 @@ export class LoansListComponent implements OnInit, OnDestroy {
       this.loadLoans(),
       this.loadClients()
     ]).subscribe({
-      next:()=>this.loading = false,
+      next:()=> this.loading = false,
       error:()=> this.loading = false
     })
   }
@@ -44,8 +45,8 @@ export class LoansListComponent implements OnInit, OnDestroy {
   protected searchTerm = model('')
   protected readonly filteredLoans = computed(()=> {
     const searchTerm = this.searchTerm()
-    if (!searchTerm) return this.loans
-    return this.loans.filter(loan =>
+    if (!searchTerm) return this.loans()
+    return this.loans().filter(loan =>
       loan.client?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       loan.currency.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       loan?.id.toString().includes(searchTerm)
@@ -54,7 +55,17 @@ export class LoansListComponent implements OnInit, OnDestroy {
 
   protected loadLoans() {
     return this.loansService.findAll().pipe(
-      map(loans =>this.loans = loans),
+      map(loans =>this.loans.set(
+        loans.map(l=>{
+          return {
+            ...l,
+            currency:{
+              symbol:l.currency.symbol,
+              name:this.currencyService.avaliableCurrencies().find(c=>c.symbol === l.currency.symbol)?.name || l?.currency?.name,
+            }
+          }
+        })
+      )),
       catchError((error)=> {
         this.notificationService.showError('Erro ao carregar a lista de empréstimos', error?.message || 'Erro desconhecido')
           throw  error;
@@ -93,14 +104,18 @@ export class LoansListComponent implements OnInit, OnDestroy {
   //TODO - redundante com clients, ver para usar herança
   protected onFormSubmitted() {
     this.closeForm();
-    this.loadLoans();
+    this.subscription = this.loadLoans().subscribe();
   }
 
   protected deleteLoan(loan: LoanInterface) {
     // TODO - melhorar para modal dialog
     if (confirm(`Tem certeza que deseja excluir o empréstimo #${loan.id}?`)) {
+      this.loading = true;
       this.subscription = this.loansService.deleteById(loan.id).subscribe({
-        next: () => this.loadLoans(),
+        next: () => {
+          this.loadLoans().subscribe()
+          this.loading = false;
+        },
         error: (error) => this.notificationService.showError('Erro ao excluir cliente', error?.message || 'Erro desconhecido')
       })
     }

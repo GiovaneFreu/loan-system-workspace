@@ -4,6 +4,7 @@ import { ClientInterface,CurrencyInterface } from '@loan-system-workspace/interf
 import { Subscription } from 'rxjs';
 import { CurrencyService, NotificationService } from '../../../../core/services';
 import { differenceInMonths } from 'date-fns';
+import { json } from '@angular-devkit/core';
 
 @Injectable()
 export class LoanFormState implements OnDestroy{
@@ -18,18 +19,18 @@ export class LoanFormState implements OnDestroy{
 
   readonly form= this.fb.group({
     purchaseDate: this.fb.control('', Validators.required),
-    currency: this.fb.control<CurrencyInterface | null>(null, Validators.required),
+    currencyId: this.fb.control<CurrencyInterface['symbol'] | null>(null, Validators.required),
     purchaseValue: this.fb.control(0, [Validators.required, Validators.min(0.01)]),
     interestRate: this.fb.control(0, Validators.required),
     dueDate: this.fb.control('', Validators.required),
-    client: this.fb.control<ClientInterface | null>(null, Validators.required),
+    clientId: this.fb.control<number | null>(null, Validators.required),
     conversionRate: this.fb.control<number |null>(null, Validators.required),
     finalAmount: this.fb.control<number>(0, [Validators.required, Validators.min(0.01)]),
     monthsCount: this.fb.control(0, [Validators.required, Validators.min(1)]),
   })
 
   constructor() {
-   const s1=   this.form.controls.currency.valueChanges.subscribe(()=> this.loadConversionRate());
+   const s1=   this.form.controls.currencyId.valueChanges.subscribe(()=> this.loadConversionRate());
    const s2 =   this.form.controls.purchaseValue.valueChanges.subscribe(()=> this.calcValues());
    const s3 =   this.form.controls.interestRate.valueChanges.subscribe(()=> this.calcValues());
    const s4 =   this.form.controls.dueDate.valueChanges.subscribe(()=> this.calcValues());
@@ -45,12 +46,12 @@ export class LoanFormState implements OnDestroy{
   }
 
   private loadConversionRate() {
-    const currency = this.form.controls.currency.value
+    const currencyId = this.form.controls.currencyId.value
     const purchaseDate = this.form.controls.purchaseDate.value
-    if (!currency || !purchaseDate) return;
+    if (!currencyId || !purchaseDate) return;
     this.loadingConversionRate.set(true)
     this.conversionRateSubscription?.unsubscribe();
-    this.conversionRateSubscription = this.currencyService.getCurrencyQuote(currency,purchaseDate).subscribe({
+    this.conversionRateSubscription = this.currencyService.getCurrencyQuote(currencyId,purchaseDate).subscribe({
       next:(value) => {
         if (!value) {
           this.notificationService.showWarning('Cotação não disponível para a data selecionada.', 'Deve ser selecionado um dia útil.')

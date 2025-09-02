@@ -14,9 +14,6 @@ export class ClientsService {
     return this.http.get<ClientInterface[]>(this.apiUrl)
   }
 
-  findById(){
-
-  }
 
   deleteById(id: number) {
     return this.http.delete<void>(`${this.apiUrl}/${id}`)

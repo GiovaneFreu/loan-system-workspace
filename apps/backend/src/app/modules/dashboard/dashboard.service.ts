@@ -13,7 +13,7 @@ export class DashboardService {
     const clientsTotal = await this.dataSource.manager.count(Client)
 
     const loans = await this.dataSource.manager.find(Loan)
-    const loansSum  = loans.reduce((acc, loan) => acc + loan.purchaseValue, 0)
+    const loansSum  = loans.reduce((acc, loan) => acc + (loan.purchaseValue * loan.conversionRate), 0)
 
     return {
       clientsTotal,

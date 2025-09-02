@@ -50,15 +50,17 @@ export class LoanFormComponent implements OnInit {
 
   ngOnInit() {
     if (this.loan) {
-        const { purchaseDate, dueDate, purchaseValue, currency, client } = this.loan;
         this.form.patchValue({
-
-          dueDate: formatDateForInput(dueDate),
-          purchaseDate: formatDateForInput(purchaseDate),
-          purchaseValue,
-          currency,
-          client
-        },{ emitEvent: false });
+          currencyId: this.loan.currency.symbol,
+          purchaseDate: formatDateForInput(this.loan.purchaseDate),
+          purchaseValue: this.loan.purchaseValue,
+          interestRate: this.loan.interestRate,
+          monthsCount: this.loan.monthsCount,
+          finalAmount: this.loan.finalAmount,
+          conversionRate: this.loan.conversionRate,
+          dueDate: formatDateForInput(this.loan.dueDate),
+          clientId: this.loan.client.id,
+        });
       }
     }
 
@@ -83,14 +85,18 @@ export class LoanFormComponent implements OnInit {
 
       const loanData:Omit<LoanInterface, 'id'> = {
         purchaseDate: new Date(value.purchaseDate!),
-        currency: value.currency as CurrencyInterface,
+        currency: {
+          symbol: value.currencyId
+        }  as CurrencyInterface,
         purchaseValue: value.purchaseValue!,
         interestRate: value.interestRate!,
         monthsCount:  value.monthsCount!,
         finalAmount: value.finalAmount!,
         conversionRate: value.conversionRate!,
         dueDate: new Date(value.dueDate!),
-        client: value.client as ClientInterface,
+        client: {
+          id: value.clientId
+        } as ClientInterface
       };
 
       const request = this.isEditing

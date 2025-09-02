@@ -18,18 +18,18 @@
       <label for="clientId" class="block text-sm font-medium text-gray-300 mb-2">Cliente *</label>
       <select
         id="clientId"
-        formControlName="client"
+        formControlName="clientId"
         name="clientId"
         class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
-        [class.border-red-600]="form.controls.client.invalid && form.controls.client.touched">
+        [class.border-red-600]="form.controls.clientId.invalid && form.controls.clientId.touched">
         <option [value]=null>Selecione um cliente</option>
-        @for (client of clients; track client){
-          <option [ngValue]="client">
+        @for (client of clients; track client.id){
+          <option [ngValue]="client.id">
             #{{client.id}} | {{client.name}} | ({{client.cpf_cnpj}})
           </option>
         }
       </select>
-      @if(form.controls.client.invalid && form.controls.client.touched) {
+      @if(form.controls.clientId.invalid && form.controls.clientId.touched) {
       <p class="mt-1 text-sm text-red-300">Cliente é obrigatório</p>
       }
     </div>
@@ -73,20 +73,20 @@
           <label for="currencyType" class="block text-sm font-medium text-gray-300 mb-2">Moeda *</label>
           <select
             id="currencyType"
-            formControlName="currency"
+            formControlName="currencyId"
             name="currencyType"
             class="w-full px-3 py-[0.650rem] bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-white"
-            [class.border-red-600]="form.controls.currency.invalid && form.controls.currency.touched">
+            [class.border-red-600]="form.controls.currencyId.invalid && form.controls.currencyId.touched">
           >
 
-            @for (currency of avaliableCurrencies; track currency){
-              <option [ngValue]="currency">
+            @for (currency of avaliableCurrencies(); track currency.symbol){
+              <option [ngValue]="currency.symbol">
                 {{currency.symbol}} | {{currency.name}}
               </option>
               )
             }
           </select>
-          @if(form.controls.currency.hasError('required') && form.controls.currency.touched){
+          @if(form.controls.currencyId.hasError('required') && form.controls.currencyId.touched){
             <p class="mt-1 text-sm text-red-300">Moeda é obrigatória</p>
           }
         </div>
@@ -121,7 +121,7 @@
             Valor Obtido*
           </label>
           <div class="relative">
-            <span class="absolute left-3 top-2.5 text-gray-400">{{form.value.currency?.symbol}}</span>
+            <span class="absolute left-3 top-2.5 text-gray-400">{{form.value.currencyId}}</span>
             <input
               id="purchaseValue"
               type="number"
@@ -166,9 +166,9 @@
                   </p>
                 </div>
                 <div class="w-full flex gap-2 pl-12 items-center">
-                  <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Valor Total final em {{ form.controls.currency.value!.symbol }}:</label>
+                  <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Valor Total final em {{ form.controls.currencyId.value! }}:</label>
                   <p  class="text-lg text-gray-300">
-                    {{totalValue | currency: form.controls.currency.value!.symbol : '' : '1.2-2'}}
+                    {{totalValue | currency: form.controls.currencyId.value! : '' : '1.2-2'}}
                   </p>
                 </div>
 
