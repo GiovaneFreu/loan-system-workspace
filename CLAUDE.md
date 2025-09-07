@@ -82,6 +82,10 @@ npx nx test interfaces
 # Test all projects
 npx nx run-many -t test
 
+# Test with coverage
+npx nx test frontend --configuration=ci
+npx nx test backend --configuration=ci
+
 # E2E tests
 npx nx e2e frontend-e2e
 npx nx e2e backend-e2e
@@ -141,3 +145,12 @@ Required environment variables:
 - `apps/backend/src/app/app.module.ts`: Main application module with all imports
 - `libs/interfaces/src/index.ts`: Shared interface exports
 - `infrastructure/docker/docker-compose.yml`: Development Docker setup
+- `nx.json`: Nx workspace configuration with target defaults and plugins
+
+## Dependencies and Architecture Notes
+- **Frontend Dependencies**: Angular 20+ with Jest for testing, ESLint for linting, Playwright for E2E
+- **Backend Dependencies**: NestJS 11+, TypeORM 0.3+, class-validator/class-transformer for DTOs
+- **Shared Libraries**: All projects share TypeScript interfaces via `libs/interfaces`
+- **Development Tools**: Nx 21+, Tailwind CSS for styling, date-fns for date handling
+- **Testing Framework**: Jest with Angular preset for unit tests, Playwright for E2E tests
+- **Code Quality**: ESLint with Angular rules, Prettier for formatting
