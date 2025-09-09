@@ -22,6 +22,22 @@ services:
     depends_on:
       - postgres
 
+  backend-java:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.java
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=loan_user
+      - DATABASE_PASSWORD=loan_pass123
+      - DATABASE_NAME=loan_system_db
+      - DATABASE_SSL=false
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+
 volumes:
   postgres_data:
     external: false
