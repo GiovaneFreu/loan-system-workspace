@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group = 'com.loanmanager'
+version = '1.0.0'
+
+// Java version configuration - using toolchain to target Java 21
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Shared java-interfaces library
+    implementation project(':java-interfaces')
+    
+    // Jakarta EE 11 - provided by WildFly
+    providedCompile 'jakarta.platform:jakarta.jakartaee-api:11.0.0'
+    
+    // PostgreSQL Driver - needed in runtime
+    runtimeOnly 'org.postgresql:postgresql:42.7.4'
+    
+    // Test dependencies
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'com.h2database:h2:2.3.232'
+}
+
+// Configure output directory to follow Nx conventions
+project.buildDir = file("../../dist/apps/${project.name}")
+
+war {
+    destinationDirectory = file("../../dist/apps/${project.name}")
+    archiveBaseName = 'backend-java'
+}
+

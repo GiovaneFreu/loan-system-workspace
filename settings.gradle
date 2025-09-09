@@ -1,0 +1,16 @@
+rootProject.name = 'loan-system-workspace'
+
+// Enable Gradle build cache for better performance
+buildCache {
+    local {
+        enabled = true
+    }
+}
+
+// Include Java library projects
+include ':java-interfaces'
+project(':java-interfaces').projectDir = file('libs/java-interfaces')
+
+// Include Java application projects  
+include ':backend-java'
+project(':backend-java').projectDir = file('apps/backend-java')

@@ -1,0 +1,47 @@
+{
+  "name": "backend-java",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/backend-java/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./gradlew :backend-java:war",
+        "cwd": "{workspaceRoot}"
+      },
+      "configurations": {
+        "production": {
+          "command": "./gradlew :backend-java:war --no-daemon --console=plain",
+          "cwd": "{workspaceRoot}"
+        }
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./gradlew :backend-java:test",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./gradlew :backend-java:clean",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  },
+  "tags": ["type:app", "platform:java", "ide:intellij", "framework:jakarta-ee"],
+  "metadata": {
+    "framework": "Jakarta EE 11",
+    "buildTool": "Gradle (IntelliJ + CLI)",
+    "server": "WildFly",
+    "deployment": "WAR to dist/apps/backend-java/",
+    "development": {
+      "primary": "IntelliJ IDEA with WildFly integration",
+      "alternative": "CLI with Gradle wrapper",
+      "endpoints": "http://localhost:8080/api/"
+    }
+  }
+}

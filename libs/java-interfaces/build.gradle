@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+}
+
+group = 'com.loanmanager'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.18.2'
+}
+
+// Configure output directory to follow Nx conventions
+project.buildDir = file("../../dist/libs/${project.name}")
+

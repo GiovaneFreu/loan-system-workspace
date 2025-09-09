@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0"
+             xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence 
+                                 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+    
+    <persistence-unit name="loan-manager" transaction-type="JTA">
+        <jta-data-source>java:jboss/datasources/PostgresDS</jta-data-source>
+        
+        <class>com.loanmanager.entity.Client</class>
+        <class>com.loanmanager.entity.Loan</class>
+        
+        <properties>
+            <!-- Jakarta EE schema generation -->
+            <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+            <!-- Preserve case-sensitive identifiers in PostgreSQL -->
+            <property name="hibernate.globally_quoted_identifiers" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>

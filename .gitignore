@@ -4,18 +4,30 @@
 dist
 tmp
 out-tsc
+build
+
+# Exception: Allow specific demo artifacts (optional)
+# !dist/apps/*/demo.*
+# !dist/libs/*/demo.*
 
 # dependencies
 node_modules
 
 # IDEs and editors
 /.idea
+**/*.iml
 .project
 .classpath
 .c9/
 *.launch
 .settings/
 *.sublime-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.ipr
+out/
 
 # IDE - VSCode
 .vscode/*
@@ -34,9 +46,6 @@ yarn-error.log
 testem.log
 /typings
 
-# System Files
-.DS_Store
-Thumbs.db
 
 .nx/cache
 .nx/workspace-data
@@ -54,3 +63,25 @@ infrastructure/environments/.env.staging
 infrastructure/environments/.env.docker
 infrastructure/environments/.env.local
 infrastructure/environments/.env.*.local
+
+# Gradle
+.gradle/
+**/build/
+gradle-app.setting
+
+# Gradle Wrapper (keep wrapper files but ignore cache)
+!gradle/wrapper/gradle-wrapper.properties
+!gradle/wrapper/gradle-wrapper.jar
+
+# Log files
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

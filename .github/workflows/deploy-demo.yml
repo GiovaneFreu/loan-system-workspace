@@ -1,0 +1,99 @@
+name: Deploy to Demo Environment
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: rg-loan-system-demo
+  ACR_NAME: loansystemacr
+  CONTAINER_APP_NAME: loan-system-app-demo
+  ENVIRONMENT_NAME: demo
+
+jobs:
+  validate:
+    name: Validate and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests (skip coverage for speed)
+        run: |
+          npx nx test backend --passWithNoTests
+          npx nx test frontend --passWithNoTests
+      
+      - name: Build validation
+        env:
+          NODE_ENV: demo
+        run: |
+          npx nx build backend --configuration=production
+          npx nx build frontend --configuration=production
+  
+  deploy:
+    needs: validate
+    name: Deploy to Demo
+    runs-on: ubuntu-latest
+    environment:
+      name: demo
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_DEMO }}
+
+      - name: Build and push to ACR (optimized)
+        run: |
+          # Build apenas com tag latest para economizar storage
+          az acr build \
+            --registry ${{ env.ACR_NAME }} \
+            --image loan-system:demo-latest \
+            --file infrastructure/docker/Dockerfile.prod \
+            .
+
+      - name: Deploy with cost optimization
+        run: |
+          # Atualizar Container App com configurações econômicas
+          az containerapp update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.ACR_NAME }}.azurecr.io/loan-system:demo-latest \
+            --min-replicas 0 \
+            --max-replicas 1 \
+            --cpu 0.25 \
+            --memory 0.5Gi \
+            --revision-mode single
+          
+          echo "✅ Demo deploy completed with cost optimization"
+
+      - name: Cleanup old images (save ACR storage costs)
+        continue-on-error: true
+        run: |
+          # Manter apenas as 3 imagens mais recentes
+          az acr repository show-manifests \
+            --name ${{ env.ACR_NAME }} \
+            --repository loan-system \
+            --orderby time_desc \
+            --query '[3:].digest' -o tsv | \
+          while read digest; do
+            if [ ! -z "$digest" ]; then
+              az acr repository delete \
+                --name ${{ env.ACR_NAME }} \
+                --image loan-system@$digest \
+                --yes
+            fi
+          done
+          echo "✅ Old images cleaned up"
