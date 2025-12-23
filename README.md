@@ -13,6 +13,10 @@ This system provides complete loan management functionality, including:
 - **Dashboard**: Metrics visualization and system overview
 - **Financial Calculations**: Interest rates, currency conversion, and installments
 
+## Live Demo
+
+- https://annoyed-magdaia-gfservicos-2b87a1c1.koyeb.app/
+
 ## Architecture
 
 ### Technology Stack

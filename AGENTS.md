@@ -5,6 +5,7 @@ This file provides guidance to coding agents when working with code in this repo
 ## Project Overview
 
 This is a loan management system built with:
+
 - **Frontend**: Angular 20+ with standalone components and Tailwind CSS
 - **Backend**: NestJS with TypeORM and PostgreSQL
 - **Shared**: TypeScript interfaces library
@@ -13,6 +14,7 @@ This is a loan management system built with:
 ## Architecture
 
 ### Nx Workspace Structure
+
 ```
 apps/
 ├── frontend/          # Angular frontend application
@@ -25,13 +27,15 @@ libs/
 ```
 
 ### Frontend Architecture
+
 - **Standalone Components**: Uses Angular standalone components (no NgModule for components)
-- **Feature Modules**: Organized by business domains (loans, clients, dashboard)  
+- **Feature Modules**: Organized by business domains (loans, clients, dashboard)
 - **Routing**: Lazy-loaded feature modules with `loadChildren`
 - **Locale**: Configured for Portuguese Brazil (`pt-BR`)
 - **Proxy**: Backend API proxied during development via `proxy.conf.json`
 
 ### Backend Architecture
+
 - **Modules**: Feature-based modules (clients, loans, dashboard, health)
 - **Database**: PostgreSQL with TypeORM, entities include Client and Loan
 - **Config**: Environment-based configuration with validation
@@ -40,6 +44,7 @@ libs/
 - **Connection Resilience**: Database connection with retry logic (5 attempts, 5s delay)
 
 ### Database Configuration
+
 - Uses PostgreSQL with TypeORM
 - Environment variables for database connection
 - SSL support configurable
@@ -49,11 +54,12 @@ libs/
 ## Development Commands
 
 ### Running Applications
+
 ```bash
 # Start frontend (depends on backend)
 npx nx serve frontend
 
-# Start backend only  
+# Start backend only
 npx nx serve backend
 
 # Start both with Docker
@@ -61,11 +67,12 @@ docker-compose -f infrastructure/docker/docker-compose.yml up
 ```
 
 ### Building
+
 ```bash
 # Build frontend
 npx nx build frontend
 
-# Build backend  
+# Build backend
 npx nx build backend
 
 # Build all projects
@@ -73,6 +80,7 @@ npx nx run-many -t build
 ```
 
 ### Testing
+
 ```bash
 # Test specific project
 npx nx test frontend
@@ -88,6 +96,7 @@ npx nx e2e backend-e2e
 ```
 
 ### Linting
+
 ```bash
 # Lint specific project
 npx nx lint frontend
@@ -98,11 +107,13 @@ npx nx run-many -t lint
 ```
 
 ### Database
+
 Development database runs on port 5433 (not 5432) to avoid conflicts.
 
 ## Code Conventions
 
 ### Frontend
+
 - Use standalone components with Angular 20+ features
 - Feature-based module organization under `apps/frontend/src/app/pages/`
 - Shared components in `apps/frontend/src/app/core/components/`
@@ -112,6 +123,7 @@ Development database runs on port 5433 (not 5432) to avoid conflicts.
 - Tailwind CSS for styling
 
 ### Backend
+
 - Feature modules following NestJS conventions
 - Controllers, services, DTOs, and entities per module
 - Environment configuration with validation
@@ -120,24 +132,43 @@ Development database runs on port 5433 (not 5432) to avoid conflicts.
 - Health checks for monitoring
 
 ### Shared Code
+
 - Common interfaces in `libs/interfaces`
 - Export through barrel files (`index.ts`)
 - Type-safe contracts between frontend and backend
 
 ## Environment Configuration
+
 Environment files expected in `infrastructure/environments/`:
+
 - `.env` (base)
 - `.env.development`
 - `.env.docker`
 - Other environment-specific files
 
 Required environment variables:
+
 - `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME`
 - `DATABASE_SSL` (boolean)
 - `NODE_ENV`
 
 ## Key Files
+
 - `apps/frontend/proxy.conf.json`: API proxy configuration for development
 - `apps/backend/src/app/app.module.ts`: Main application module with all imports
 - `libs/interfaces/src/index.ts`: Shared interface exports
 - `infrastructure/docker/docker-compose.yml`: Development Docker setup
+
+<!-- nx configuration start-->
+<!-- Leave the start & end comments to automatically receive updates. -->
+
+# General Guidelines for working with Nx
+
+- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
+- You have access to the Nx MCP server and its tools, use them to help the user
+- When answering questions about the repository, use the `nx_workspace` tool first to gain an understanding of the workspace architecture where applicable.
+- When working in individual projects, use the `nx_project_details` mcp tool to analyze and understand the specific project structure and dependencies
+- For questions around nx configuration, best practices or if you're unsure, use the `nx_docs` tool to get relevant, up-to-date docs. Always use this instead of assuming things about nx configuration
+- If the user needs help with an Nx configuration or project graph error, use the `nx_workspace` tool to get any errors
+
+<!-- nx configuration end-->
