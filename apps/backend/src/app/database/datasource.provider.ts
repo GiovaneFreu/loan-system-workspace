@@ -2,7 +2,7 @@
 import { ConfigService } from '@nestjs/config';
 import { existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
-import { DataSource } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import { Client } from '../modules/clients/entities/client.entity';
 import { Loan } from '../modules/loans/entities/loan.entity';
 
@@ -19,9 +19,8 @@ export const databaseProviders = [
 
       const defaultSqlitePath = '/var/lib/data/data.db';
 
-      const baseConfig = {
-        entities: [Client, Loan],
-      } as const;
+      const entities = [Client, Loan];
+      const baseConfig: Pick<DataSourceOptions, 'entities'> = { entities };
 
       const dataSource =
         databaseType === 'sqlite'
