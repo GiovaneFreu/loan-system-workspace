@@ -14,4 +14,3 @@ org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryEr
 # Workspace-specific properties
 workspace.name=loan-system-workspace
 workspace.version=1.0.0
-org.gradle.workers.max=10
