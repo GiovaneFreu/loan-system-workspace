@@ -1,4 +1,4 @@
-import { inject, Injectable, OnDestroy, Signal, signal } from '@angular/core';
+import { inject, Injectable, OnDestroy, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { CurrencyInterface } from '@loan-system-workspace/interfaces';
 import { map, Subscription } from 'rxjs';
@@ -32,11 +32,11 @@ export class CurrencyService implements OnDestroy{
 
   private readonly http = inject(HttpClient);
 
-  private _avaliableCurrencies: Signal<CurrencyInterface[]> = signal([]);
+  private readonly _avaliableCurrencies = signal<CurrencyInterface[]>([]);
   private subscription!:Subscription;
 
   get avaliableCurrencies(){
-    return this._avaliableCurrencies
+    return this._avaliableCurrencies.asReadonly();
   }
 
   ngOnDestroy(): void {
