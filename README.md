@@ -2,32 +2,35 @@
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-A comprehensive loan management system built with Nx monorepo, Angular, and NestJS.
+[![Nx](https://img.shields.io/badge/Nx-22.x-0f172a)](https://nx.dev)
+[![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)](https://angular.dev)
+[![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Koyeb-0ea5e9)](https://annoyed-magdaia-gfservicos-2b87a1c1.koyeb.app/)
 
-## About the Project
+A loan management system built as an Nx monorepo with Angular and NestJS. The project emphasizes clean domain boundaries, shared contracts, and a production-ready deployment flow using a single container.
 
-This system provides complete loan management functionality, including:
-
-- **Client Management**: Registration, editing, and querying of clients (CPF/CNPJ)
-- **Loan Management**: Creation, calculation, and tracking of loans
-- **Dashboard**: Metrics visualization and system overview
-- **Financial Calculations**: Interest rates, currency conversion, and installments
+## Highlights
+- Client and loan management with financial calculations
+- Dashboard metrics and consolidated overview
+- Standalone Angular components with Tailwind CSS and pt-BR locale
+- NestJS API with TypeORM, environment validation, and health checks
+- Shared interfaces library for frontend-backend contracts
+- Multi-stage Docker build, frontend served by backend in production
 
 ## Live Demo
-
 - https://annoyed-magdaia-gfservicos-2b87a1c1.koyeb.app/
 
-## Architecture
-
-### Technology Stack
-- **Frontend**: Angular 20+ with standalone components
-- **Backend**: NestJS with TypeORM
-- **Database**: PostgreSQL
-- **Styling**: Tailwind CSS
-- **Monorepo**: Nx Workspace
+## Tech Stack
+- **Frontend**: Angular 21, RxJS, Tailwind CSS
+- **Backend**: NestJS 11, TypeORM
+- **Database**: SQLite (production default), PostgreSQL (development)
+- **Monorepo**: Nx 22
+- **Testing**: Jest, Playwright
 - **Containerization**: Docker
 
-### Workspace Structure
+## Monorepo Structure
 ```
 apps/
 ├── frontend/          # Angular application
@@ -39,31 +42,71 @@ libs/
 └── interfaces/        # Shared TypeScript interfaces
 ```
 
-## Development
+## Architecture
+```mermaid
+flowchart LR
+  subgraph Browser
+    UI[Angular Frontend]
+  end
+  subgraph Koyeb["Koyeb (Production)"]
+    APP[NestJS API\n+ Angular Static]
+    VOL[(Persistent Volume\n/var/lib/data)]
+  end
+  subgraph Data
+    PG[(PostgreSQL\nDevelopment)]
+  end
+  subgraph Monorepo
+    IF[Shared Interfaces]
+  end
 
-### Prerequisites
-- Node.js 18+
-- Docker and Docker Compose
-- PostgreSQL (or use via Docker)
+  UI -->|/api + static| APP
+  APP -->|SQLite| VOL
+  APP -.->|TypeORM| PG
+  UI --- IF
+  APP --- IF
+```
 
-### Environment Setup
+## Environment Configuration
+Environment files are loaded from `infrastructure/environments/.env.<NODE_ENV>` and `infrastructure/environments/.env`. These files are gitignored. Use `infrastructure/environments/.env.example` as a template.
 
-1. Clone the repository
-2. Install dependencies:
+### Production (Koyeb / SQLite)
+```
+NODE_ENV=production
+PORT=8080
+DATABASE_TYPE=sqlite
+DATABASE_PATH=/var/lib/data/data.db
+DATABASE_SYNCHRONIZE=true
+```
+
+Attach a persistent volume to `/var/lib/data`. Use `DATABASE_SYNCHRONIZE=true` only for the initial deployment.
+
+### Development (PostgreSQL via Docker)
+```
+NODE_ENV=development
+PORT=3000
+DATABASE_TYPE=postgres
+DATABASE_HOST=localhost
+DATABASE_PORT=5433
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+DATABASE_NAME=loan-system
+DATABASE_SSL=false
+```
+
+## Local Development
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Configure environment variables in `infrastructure/environments/.env`
+2. Create `infrastructure/environments/.env.development` using the development template above.
 
-4. Start the database:
+3. Start PostgreSQL:
 ```bash
 docker-compose -f infrastructure/docker/docker-compose.yml up postgres -d
 ```
 
-### Running the Application
-
-#### Local Development
+4. Run the apps:
 ```bash
 # Start frontend and backend simultaneously
 npx nx serve frontend
@@ -72,137 +115,71 @@ npx nx serve frontend
 npx nx serve backend
 ```
 
-#### With Docker
-```bash
-# Start all services
-docker-compose -f infrastructure/docker/docker-compose.yml up
-```
+The Angular dev server proxies `/api` to `http://localhost:3000`.
 
-### Production Build
-
+## Production Build
 ```bash
-# Build frontend
 npx nx build frontend
-
-# Build backend
 npx nx build backend
-
-# Build all projects
 npx nx run-many -t build
 ```
 
 ## Deployment (Docker / Koyeb)
-
-The repository now includes a multi-stage `Dockerfile` that builds the Angular frontend and NestJS backend together and runs them on the same server. SQLite is the default database to simplify deployment on lightweight instances such as Koyeb nano.
-
-1. Ensure the following environment variables are set (Koyeb example):
-   - `PORT=8080` (default already)
-   - `DATABASE_TYPE=sqlite` (default already)
-   - `DATABASE_PATH=/var/lib/data/data.db` (points to the attached persistent volume and is the default path)
-   - `DATABASE_SYNCHRONIZE=true` (only for initial setups without migrations)
-2. Build and run locally:
-   ```bash
-   docker build -t loan-system .
-   docker run -p 8080:8080 -e DATABASE_PATH=/var/lib/data/data.db loan-system
-   ```
-3. On Koyeb, attach a volume to `/var/lib/data` so the SQLite database persists between deployments. The backend will automatically serve the built Angular frontend from `dist/apps/frontend/browser`.
-
-### Testing
-
+1. Build the image:
 ```bash
-# Run all tests
-npx nx run-many -t test
+docker build -t loan-system .
+```
 
-# Specific tests
+2. Run locally:
+```bash
+docker run -p 8080:8080 \
+  -e PORT=8080 \
+  -e DATABASE_TYPE=sqlite \
+  -e DATABASE_PATH=/var/lib/data/data.db \
+  -e DATABASE_SYNCHRONIZE=true \
+  loan-system
+```
+
+3. On Koyeb, set the same environment variables and attach a volume to `/var/lib/data`.
+
+## API
+- Base path: `/api`
+- Health check: `/api/health`
+
+## Testing
+```bash
+npx nx run-many -t test
 npx nx test frontend
 npx nx test backend
 npx nx test interfaces
-
-# E2E tests
 npx nx e2e frontend-e2e
 npx nx e2e backend-e2e
 ```
 
-### Linting
-
+## Linting
 ```bash
-# Lint all projects
 npx nx run-many -t lint
-
-# Specific linting
 npx nx lint frontend
 npx nx lint backend
 ```
 
-## Features
-
-### Client Management
-- Registration of individuals (CPF) and companies (CNPJ)
-- Monthly income tracking
-- Loan history per client
-
-### Loan Management
-- Multiple currency types
-- Automatic interest and installment calculations
-- Due date tracking
-- Currency conversion
-
-### Dashboard
-- System metrics
-- Overview of clients and loans
-- Financial indicators
-
-## Database Structure
-
-### Main Entities
-- **Client**: Client data (CPF/CNPJ, income, etc.)
-- **Loan**: Loan information (amount, interest, term, etc.)
-
-### Configuration
-- PostgreSQL on port 5433 (development)
-- TypeORM for ORM
-- Automatic migrations in development
-
-## Useful Scripts
-
+## Useful Nx Commands
 ```bash
-# Visualize project dependencies
 npx nx graph
-
-# Information about a specific project
 npx nx show project frontend
-
-# List all projects
 npx nx show projects
-
-# Generate new components/modules
 npx nx g @nx/angular:component my-component --project=frontend
 ```
 
-## Development Environment
-
-The system is configured with:
-- Hot reload for development
-- Automatic proxy between frontend and backend
-- pt-BR locale configured
-- ESLint and Prettier for code standardization
+## Data Model
+- **Client**: CPF/CNPJ, income, and profile data
+- **Loan**: Amount, rate, term, schedule, and status
 
 ## Ports
-
-- **Frontend**: http://localhost:4200
-- **Backend**: http://localhost:3000
-- **PostgreSQL**: localhost:5433
-
-## Contributing
-
-To contribute to the project:
-
-1. Fork the repository
-2. Create a branch for your feature (`git checkout -b feature/new-feature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/new-feature`)
-5. Create a Pull Request
+- **Frontend (dev)**: http://localhost:4200
+- **Backend (dev)**: http://localhost:3000 (configurable via `PORT`)
+- **Backend (prod)**: http://localhost:8080 (configurable via `PORT`)
+- **PostgreSQL (dev)**: localhost:5433
 
 ## License
-
-This project is under the MIT license.
+MIT
