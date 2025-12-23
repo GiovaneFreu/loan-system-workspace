@@ -5,13 +5,16 @@ import { DATA_SOURCE } from '../../database/datasource.provider';
 describe('LoansService', () => {
   let service: LoansService;
 
+  const mockRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+    find: jest.fn(),
+    findOne: jest.fn(),
+    delete: jest.fn(),
+  };
+
   const mockDataSource = {
-    manager: {
-      find: jest.fn(),
-      save: jest.fn(),
-      findOne: jest.fn(),
-      remove: jest.fn(),
-    },
+    getRepository: jest.fn().mockReturnValue(mockRepository),
   };
 
   beforeEach(async () => {

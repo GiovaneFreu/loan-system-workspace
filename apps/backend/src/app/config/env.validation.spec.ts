@@ -1,7 +1,8 @@
-import { validateEnv, EnvironmentVariables } from './env.validation';
+import { validateEnv } from './env.validation';
 
 describe('Environment Validation', () => {
   const baseConfig = {
+    DATABASE_TYPE: 'postgres',
     DATABASE_HOST: 'localhost',
     DATABASE_PORT: '5432',
     DATABASE_USER: 'test',
@@ -79,7 +80,7 @@ describe('Environment Validation', () => {
   describe('Optional configuration', () => {
     it('should use default PORT when not provided', () => {
       const result = validateEnv(baseConfig);
-      expect(result.PORT).toBe(3000);
+      expect(result.PORT).toBe(8080);
     });
 
     it('should accept custom PORT', () => {

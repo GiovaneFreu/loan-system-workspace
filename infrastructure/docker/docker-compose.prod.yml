@@ -7,13 +7,12 @@ services:
         NODE_ENV: production
     environment:
       NODE_ENV: production
-      DATABASE_HOST: ${DATABASE_HOST}
-      DATABASE_PORT: ${DATABASE_PORT:-5432}
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
+      PORT: ${PORT:-8080}
+      DATABASE_TYPE: ${DATABASE_TYPE:-sqlite}
+      DATABASE_PATH: ${DATABASE_PATH:-/var/lib/data/data.db}
+      DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE:-true}
     ports:
-      - "${PORT:-3000}:3000"
+      - "${PORT:-8080}:8080"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "healthcheck.js"]
