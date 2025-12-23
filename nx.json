@@ -14,7 +14,15 @@
     ],
     "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
   },
-  "nxCloudId": "68af4d2ebd49776c13ff2316",
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
+        "useDaemonProcess": false
+      }
+    }
+  },
   "targetDefaults": {
     "@angular/build:application": {
       "cache": true,

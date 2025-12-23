@@ -1,0 +1,17 @@
+node_modules
+dist
+tmp
+*.log
+npm-debug.log*
+Dockerfile
+docker-compose.yml
+*.tsbuildinfo
+coverage
+test-results
+.nx
+.idea
+.vscode
+infrastructure/docker
+infrastructure/environments
+apps/frontend-e2e
+apps/backend-e2e

@@ -1,13 +1,14 @@
 import { plainToInstance } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsNumber,
   IsOptional,
   IsString,
-  validateSync,
-  IsBoolean,
-  Min,
   Max,
+  Min,
+  ValidateIf,
+  validateSync,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -19,33 +20,47 @@ enum Environment {
   Docker = 'docker',
 }
 
+enum DatabaseType {
+  Postgres = 'postgres',
+  Sqlite = 'sqlite',
+}
+
 export class EnvironmentVariables {
   @IsEnum(Environment)
   @IsOptional()
   NODE_ENV: Environment = Environment.Development;
+
+  @IsEnum(DatabaseType)
+  @IsOptional()
+  DATABASE_TYPE: DatabaseType = DatabaseType.Sqlite;
 
   @Transform(({ value }) => parseInt(value, 10))
   @IsNumber()
   @Min(0)
   @Max(65535)
   @IsOptional()
-  PORT = 3000;
+  PORT = 8080;
 
+  @ValidateIf((env) => env.DATABASE_TYPE === DatabaseType.Postgres)
   @IsString()
   DATABASE_HOST: string;
 
+  @ValidateIf((env) => env.DATABASE_TYPE === DatabaseType.Postgres)
   @Transform(({ value }) => parseInt(value, 10))
   @IsNumber()
   @Min(0)
   @Max(65535)
   DATABASE_PORT: number;
 
+  @ValidateIf((env) => env.DATABASE_TYPE === DatabaseType.Postgres)
   @IsString()
   DATABASE_USER: string;
 
+  @ValidateIf((env) => env.DATABASE_TYPE === DatabaseType.Postgres)
   @IsString()
   DATABASE_PASSWORD: string;
 
+  @ValidateIf((env) => env.DATABASE_TYPE === DatabaseType.Postgres)
   @IsString()
   DATABASE_NAME: string;
 
@@ -53,6 +68,15 @@ export class EnvironmentVariables {
   @IsBoolean()
   @IsOptional()
   DATABASE_SSL = false;
+
+  @ValidateIf((env) => env.DATABASE_TYPE === DatabaseType.Sqlite)
+  @IsString()
+  DATABASE_PATH?: string;
+
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  @IsOptional()
+  DATABASE_SYNCHRONIZE?: boolean;
 
   @IsString()
   @IsOptional()
