@@ -4,6 +4,7 @@
 dist
 tmp
 out-tsc
+build
 
 # dependencies
 node_modules
@@ -44,6 +45,7 @@ Thumbs.db
 .github/instructions/nx.instructions.md
 
 .angular
+.gradle
 
 # Environment files (keep only .env.example)
 .env
