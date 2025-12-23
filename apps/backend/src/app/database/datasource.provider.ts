@@ -1,5 +1,7 @@
 
 import { ConfigService } from '@nestjs/config';
+import { existsSync, mkdirSync } from 'fs';
+import { join, dirname } from 'path';
 import { DataSource } from 'typeorm';
 import { Client } from '../modules/clients/entities/client.entity';
 import { Loan } from '../modules/loans/entities/loan.entity';
@@ -10,19 +12,47 @@ export const databaseProviders = [
   {
     provide: DATA_SOURCE,
     useFactory: async (configService: ConfigService) => {
-      const dataSource = new DataSource({
-        type: 'postgres',
-        host: configService.get<string>('DATABASE_HOST'),
-        port: configService.get<number>('DATABASE_PORT'),
-        username: configService.get<string>('DATABASE_USER'),
-        password: configService.get<string>('DATABASE_PASSWORD'),
-        database: configService.get<string>('DATABASE_NAME'),
-        entities: [
-          Client,
-          Loan,
-        ],
-        ssl: configService.get<boolean>('DATABASE_SSL') ? { rejectUnauthorized: false } : false,
-      });
+      const databaseType = configService.get<'postgres' | 'sqlite'>(
+        'DATABASE_TYPE',
+        'sqlite'
+      );
+
+      const defaultSqlitePath = '/var/lib/data/data.db';
+
+      const baseConfig = {
+        entities: [Client, Loan],
+      } as const;
+
+      const dataSource =
+        databaseType === 'sqlite'
+          ? (() => {
+              const databasePath =
+                configService.get<string>('DATABASE_PATH') || defaultSqlitePath;
+
+              const databaseDir = dirname(databasePath);
+              if (!existsSync(databaseDir)) {
+                mkdirSync(databaseDir, { recursive: true });
+              }
+
+              return new DataSource({
+                type: 'sqlite',
+                database: databasePath,
+                synchronize: configService.get<boolean>('DATABASE_SYNCHRONIZE', true),
+                ...baseConfig,
+              });
+            })()
+          : new DataSource({
+              type: 'postgres',
+              host: configService.get<string>('DATABASE_HOST'),
+              port: configService.get<number>('DATABASE_PORT'),
+              username: configService.get<string>('DATABASE_USER'),
+              password: configService.get<string>('DATABASE_PASSWORD'),
+              database: configService.get<string>('DATABASE_NAME'),
+              ssl: configService.get<boolean>('DATABASE_SSL')
+                ? { rejectUnauthorized: false }
+                : false,
+              ...baseConfig,
+            });
 
       const maxRetries = 5;
       const retryDelay = 5000;

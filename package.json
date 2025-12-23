@@ -2,7 +2,10 @@
   "name": "@loan-system-workspace/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build": "npx nx run-many -t build --configuration=production",
+    "start:prod": "node dist/apps/backend/main.js"
+  },
   "private": true,
   "dependencies": {
     "@angular/common": "~20.1.0",
@@ -26,6 +29,7 @@
     "postcss": "^8.5.6",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.8.0",
+    "sqlite3": "^5.1.7",
     "typeorm": "^0.3.26",
     "zone.js": "~0.15.0"
   },
