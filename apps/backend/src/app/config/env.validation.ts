@@ -80,6 +80,14 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
+  HTTP2_TLS_KEY_PATH?: string;
+
+  @IsString()
+  @IsOptional()
+  HTTP2_TLS_CERT_PATH?: string;
+
+  @IsString()
+  @IsOptional()
   LOG_LEVEL = 'info';
 }
 
