@@ -87,6 +87,22 @@ npx nx build backend
 npx nx run-many -t build
 ```
 
+## Deployment (Docker / Koyeb)
+
+The repository now includes a multi-stage `Dockerfile` that builds the Angular frontend and NestJS backend together and runs them on the same server. SQLite is the default database to simplify deployment on lightweight instances such as Koyeb nano.
+
+1. Ensure the following environment variables are set (Koyeb example):
+   - `PORT=8080` (default already)
+   - `DATABASE_TYPE=sqlite` (default already)
+   - `DATABASE_PATH=/var/lib/data/data.db` (points to the attached persistent volume and is the default path)
+   - `DATABASE_SYNCHRONIZE=true` (only for initial setups without migrations)
+2. Build and run locally:
+   ```bash
+   docker build -t loan-system .
+   docker run -p 8080:8080 -e DATABASE_PATH=/var/lib/data/data.db loan-system
+   ```
+3. On Koyeb, attach a volume to `/var/lib/data` so the SQLite database persists between deployments. The backend will automatically serve the built Angular frontend from `dist/apps/frontend/browser`.
+
 ### Testing
 
 ```bash

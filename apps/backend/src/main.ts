@@ -5,18 +5,55 @@
 
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import { readFileSync } from 'fs';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  
+  const tlsKeyPath = process.env.HTTP2_TLS_KEY_PATH;
+  const tlsCertPath = process.env.HTTP2_TLS_CERT_PATH;
+
+  const useHttp2 = Boolean(tlsKeyPath && tlsCertPath);
+  const httpsOptions =
+    useHttp2 && tlsKeyPath && tlsCertPath
+      ? {
+          key: readFileSync(tlsKeyPath),
+          cert: readFileSync(tlsCertPath),
+          allowHTTP1: true,
+        }
+      : undefined;
+
+  const fastifyAdapter = new FastifyAdapter(
+    useHttp2
+      ? {
+          http2: true,
+          https: httpsOptions,
+          trustProxy: true,
+        }
+      : {
+          trustProxy: true,
+        }
+  );
+
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    fastifyAdapter,
+    {
+      // keep logs aligned with platform defaults
+      bufferLogs: true,
+    }
+  );
+
   // Enable CORS for frontend communication
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://localhost:3000'],
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
   });
-  
+
   // Enable global validation pipes
   app.useGlobalPipes(
     new ValidationPipe({
@@ -25,13 +62,13 @@ async function bootstrap() {
       transform: true,
     })
   );
-  
+
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
+  const port = Number(process.env.PORT) || 8080;
+  await app.listen(port, '0.0.0.0');
   Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+    `🚀 Application is running on: http${useHttp2 ? 's' : ''}://localhost:${port}/${globalPrefix}`
   );
 }
 
