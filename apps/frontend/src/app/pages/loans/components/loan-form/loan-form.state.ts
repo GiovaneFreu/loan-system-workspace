@@ -1,10 +1,9 @@
 import { inject, Injectable, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { ClientInterface,CurrencyInterface } from '@loan-system-workspace/interfaces';
+import { CurrencyInterface } from '@loan-system-workspace/interfaces';
 import { Subscription } from 'rxjs';
 import { CurrencyService, NotificationService } from '../../../../core/services';
 import { differenceInMonths } from 'date-fns';
-import { json } from '@angular-devkit/core';
 
 @Injectable()
 export class LoanFormState implements OnDestroy{
@@ -64,8 +63,11 @@ export class LoanFormState implements OnDestroy{
         this.calcValues()
         this.loadingConversionRate.set(false)
       },
-      error:(error)=>{
-        this.notificationService.showError('Não foi possível buscar a cotação.', error?.message ??'Erro desconhecido')
+      error:(error: unknown)=>{
+        const message = error && typeof error === 'object' && 'message' in error
+          ? String(error.message)
+          : 'Erro desconhecido';
+        this.notificationService.showError('Não foi possível buscar a cotação.', message)
         this.loadingConversionRate.set(false)
       }
     })
@@ -76,7 +78,12 @@ export class LoanFormState implements OnDestroy{
     const monthTax = this.form.controls.interestRate.value ? this.form.controls.interestRate.value / 100 : 0
     const startDate = this.form.controls.purchaseDate.value
     const endDate = this.form.controls.dueDate.value
-    const period = differenceInMonths(new Date(endDate!), new Date(startDate!));
+    if (!startDate || !endDate) {
+      this.form.controls.monthsCount.patchValue(0)
+      this.form.controls.finalAmount.patchValue(principal)
+      return
+    }
+    const period = differenceInMonths(new Date(endDate), new Date(startDate));
     this.form.controls.monthsCount.patchValue(period)
     const valorFinal =  principal * Math.pow(1 + monthTax, period)
     this.form.controls.finalAmount.patchValue(valorFinal)

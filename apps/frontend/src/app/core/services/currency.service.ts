@@ -1,32 +1,28 @@
 import { inject, Injectable, OnDestroy, Signal, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { CurrencyInterface } from '@loan-system-workspace/interfaces';
 import { map, Subscription } from 'rxjs';
 import { NotificationService } from './notification.service';
 
 interface CentralBankCurrencyResponse {
-  "@odata.context": string,
-  "value": [
-    {
-      "simbolo": string,
-      "nomeFormatado": string,
-      "tipoMoeda": string
-    }
-  ]
+  '@odata.context': string;
+  value: Array<{
+    simbolo: string;
+    nomeFormatado: string;
+    tipoMoeda: string;
+  }>;
 }
 
 interface CentralBackCurrencyQuoteResponse {
-  "@odata.context": string,
-  value: [
-  {
-    paridadeCompra: number,
-    paridadeVenda: number,
-    cotacaoCompra: number,
-    cotacaoVenda: number,
-    dataHoraCotacao: string,
-    tipoBoletim: string
-  }
-]
+  '@odata.context': string;
+  value: Array<{
+    paridadeCompra: number;
+    paridadeVenda: number;
+    cotacaoCompra: number;
+    cotacaoVenda: number;
+    dataHoraCotacao: string;
+    tipoBoletim: string;
+  }>;
 }
 
 @Injectable({providedIn:'root'})
@@ -36,15 +32,8 @@ export class CurrencyService implements OnDestroy{
 
   private readonly http = inject(HttpClient);
 
-  private _avaliableCurrencies: Signal<CurrencyInterface[]> = signal([])
+  private _avaliableCurrencies: Signal<CurrencyInterface[]> = signal([]);
   private subscription!:Subscription;
-
-  //FIXME - AJUSTAR TIPAGEM
-  private _errors: any;
-
-  get errors(){
-    return this._errors
-  }
 
   get avaliableCurrencies(){
     return this._avaliableCurrencies
@@ -58,20 +47,27 @@ export class CurrencyService implements OnDestroy{
     const url = `${this.centralBankUrl}/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='${currencySymbol}'&@dataCotacao='${date.split('-').reverse().join('-')}'`
     return this.http.get<CentralBackCurrencyQuoteResponse>(url).pipe(
       map(response => response.value.length > 0 ? response.value[response.value.length -1] : null)
-    )
+    );
   }
 
   loadCurrencies() {
     this.subscription = this.http.get<CentralBankCurrencyResponse>(`${this.centralBankUrl}/Moedas`).subscribe({
       next: (response) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
         this._avaliableCurrencies.set(response.value.map(currency => ({
           name: currency.nomeFormatado,
           symbol: currency.simbolo,
-        })))
+        })));
       },
-      error: (error: any) => this.notificationService.showError('Erro ao carregar moedas', error?.message || 'Erro desconhecido')
-    })
+      error: (error: unknown) => {
+        const message = error instanceof HttpErrorResponse
+          ? (typeof error.error === 'string'
+            ? error.error
+            : (error.error as { message?: string } | null)?.message) ?? error.message
+          : error instanceof Error
+            ? error.message
+            : 'Erro desconhecido';
+        this.notificationService.showError('Erro ao carregar moedas', message);
+      }
+    });
   }
 }

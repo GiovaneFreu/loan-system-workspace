@@ -146,27 +146,27 @@
         <div  class="bg-slate-900 bg-opacity-50 border border-slate-600 rounded-md p-4">
           <div class="flex">
               <div class="flex flex-col gap-2 p-6 h-full">
-                <label for="loanResume" class="block text-xl font-extrabold  text-gray-300 mb-2">** Resumo do empréstimo **</label>
+                <span class="block text-xl font-extrabold text-gray-300 mb-2">** Resumo do empréstimo **</span>
                 <div class="w-full flex gap-2 pl-12 items-center">
-                  <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Quantidade de Meses:</label>
+                  <span class="block text-lg font-medium text-gray-300"> -> Quantidade de Meses:</span>
                   <p  class="text-lg text-gray-300">
                     {{monthsCount}}
                   </p>
                 </div>
                 <div class="w-full flex gap-2 pl-12 items-center">
-                  <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Cotação na Data do Empréstimo:</label>
+                  <span class="block text-lg font-medium text-gray-300"> -> Cotação na Data do Empréstimo:</span>
                   <p  class="text-lg text-gray-300">
                     {{conversionRate}}
                   </p>
                 </div>
                 <div class="w-full flex gap-2 pl-12 items-center">
-                  <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Valor Total final em R$:</label>
+                  <span class="block text-lg font-medium text-gray-300"> -> Valor Total final em R$:</span>
                   <p  class="text-lg text-gray-300">
                     {{brlValue | currency: 'BRL' : '' : '1.2-2'}}
                   </p>
                 </div>
                 <div class="w-full flex gap-2 pl-12 items-center">
-                  <label for="dueDate" class="block text-lg font-medium text-gray-300"> -> Valor Total final em {{ form.controls.currencyId.value! }}:</label>
+                  <span class="block text-lg font-medium text-gray-300"> -> Valor Total final em {{ form.controls.currencyId.value! }}:</span>
                   <p  class="text-lg text-gray-300">
                     {{totalValue | currency: form.controls.currencyId.value! : '' : '1.2-2'}}
                   </p>
@@ -199,7 +199,7 @@
   } @else {
     <div class="flex h-full justify-center items-start py-12 gap-4">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <label class="text-lg font-semibold text-gray-300">Carregando cotação...</label>
+            <span class="text-lg font-semibold text-gray-300">Carregando cotação...</span>
     </div>
   }
   <!-- Buttons -->

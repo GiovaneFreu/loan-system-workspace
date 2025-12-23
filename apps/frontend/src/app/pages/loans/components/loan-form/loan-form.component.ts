@@ -81,26 +81,33 @@ export class LoanFormComponent implements OnInit {
 
       this.loadingSubmission = true;
 
-      const value = this.form.value
+      const value = this.form.getRawValue();
+      if (!value.purchaseDate || !value.dueDate || !value.currencyId || value.clientId === null
+        || value.conversionRate === null || value.purchaseValue === null || value.interestRate === null
+        || value.monthsCount === null || value.finalAmount === null) {
+        this.notificationService.showError('Erro ao salvar empréstimo.', 'Preencha todos os campos obrigatórios.');
+        this.loadingSubmission = false;
+        return;
+      }
 
       const loanData:Omit<LoanInterface, 'id'> = {
-        purchaseDate: new Date(value.purchaseDate!),
+        purchaseDate: new Date(value.purchaseDate),
         currency: {
           symbol: value.currencyId
         }  as CurrencyInterface,
-        purchaseValue: value.purchaseValue!,
-        interestRate: value.interestRate!,
-        monthsCount:  value.monthsCount!,
-        finalAmount: value.finalAmount!,
-        conversionRate: value.conversionRate!,
-        dueDate: new Date(value.dueDate!),
+        purchaseValue: value.purchaseValue,
+        interestRate: value.interestRate,
+        monthsCount:  value.monthsCount,
+        finalAmount: value.finalAmount,
+        conversionRate: value.conversionRate,
+        dueDate: new Date(value.dueDate),
         client: {
           id: value.clientId
         } as ClientInterface
       };
 
-      const request = this.isEditing
-        ? this.loansService.update((this.loan as LoanInterface).id, loanData)
+      const request = this.loan
+        ? this.loansService.update(this.loan.id, loanData)
         : this.loansService.create(loanData);
 
       request.subscribe({
@@ -109,8 +116,12 @@ export class LoanFormComponent implements OnInit {
           this.loadingSubmission = false;
           this.submitted.emit();
         },
-        error: (error: { error: { message: 'string'; }; }) => {
-          this.notificationService.showError('Erro ao' + (this.isEditing ? 'alterar' : 'criar')+ 'empréstimo.', (error.error?.message || 'Erro desconhecido'))
+        error: (error: unknown) => {
+          const message = error && typeof error === 'object' && 'error' in error
+            && error.error && typeof error.error === 'object' && 'message' in error.error
+            ? String(error.error.message)
+            : 'Erro desconhecido';
+          this.notificationService.showError('Erro ao' + (this.isEditing ? 'alterar' : 'criar')+ 'empréstimo.', message)
           this.loadingSubmission = false;
         }
       });

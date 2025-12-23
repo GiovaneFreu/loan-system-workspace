@@ -21,19 +21,19 @@ export class NotificationService {
     return this.notifications;
   }
 
-  showSuccess(title: string, message?: string, duration: number = 5000): void {
+  showSuccess(title: string, message?: string, duration = 5000): void {
     this.addNotification('success', title, message, duration);
   }
 
-  showError(title: string, message?: string, duration: number = 8000): void {
+  showError(title: string, message?: string, duration = 8000): void {
     this.addNotification('error', title, message, duration);
   }
 
-  showWarning(title: string, message?: string, duration: number = 6000): void {
+  showWarning(title: string, message?: string, duration = 6000): void {
     this.addNotification('warning', title, message, duration);
   }
 
-  showInfo(title: string, message?: string, duration: number = 5000): void {
+  showInfo(title: string, message?: string, duration = 5000): void {
     this.addNotification('info', title, message, duration);
   }
 

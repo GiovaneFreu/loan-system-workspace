@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { DashboardInterface } from '@loan-system-workspace/interfaces';
 import { HttpClient } from '@angular/common/http';
 

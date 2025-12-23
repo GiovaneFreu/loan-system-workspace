@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 import { NotificationService } from '../../../../core/services';
 import { formatDateForInput, validateCpfCnpj } from '../../../../helpers';
 
+type ClientFormErrors = Partial<Record<'general' | 'name' | 'birthDate' | 'cpf_cnpj' | 'monthlyIncome', string>>;
+
 @Component({
   selector: 'app-client-form',
   standalone: false,
@@ -27,7 +29,7 @@ export class ClientFormComponent implements OnInit, OnDestroy{
   };
 
   protected loading = false;
-  protected errors: any = {};
+  protected errors: ClientFormErrors = {};
 
   private subscription!:Subscription;
 
@@ -64,24 +66,24 @@ export class ClientFormComponent implements OnInit, OnDestroy{
         birthDate: new Date(this.formData.birthDate)
       };
 
-      const request = this.isEditing
-        ? this.clientService.update(this.client!.id,clientData)
+      const request = this.client
+        ? this.clientService.update(this.client.id, clientData)
         : this.clientService.create(clientData);
 
-      request.subscribe({
+      this.subscription = request.subscribe({
         next: () => {
           this.loading = false;
           this.notificationService.showSuccess(`Cliente ${this.isEditing ? 'alterado' : 'criado'} com sucesso!`);
           this.submitted.emit();
         },
-        error: (error) => {
+        error: (error: unknown) => {
           this.loading = false;
 
-          if (error.error?.message) {
-            this.errors.general = error.error.message;
-          } else {
-            this.errors.general = 'Erro ao salvar cliente. Tente novamente.';
-          }
+          const message = error && typeof error === 'object' && 'error' in error
+            && error.error && typeof error.error === 'object' && 'message' in error.error
+            ? String(error.error.message)
+            : 'Erro ao salvar cliente. Tente novamente.';
+          this.errors.general = message;
         }
       });
     }
