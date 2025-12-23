@@ -9,6 +9,8 @@ describe('DashboardController', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DashboardController],
       providers: [
@@ -22,7 +24,11 @@ describe('DashboardController', () => {
     controller = module.get<DashboardController>(DashboardController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  it('delegates dashboard data retrieval', async () => {
+    const payload = { clientsTotal: 2, loansQuantityTotal: 3, loansValueTotal: 100 };
+    dashboardServiceMock.getDashboardData.mockResolvedValue(payload);
+
+    await expect(controller.getDashboardData()).resolves.toEqual(payload);
+    expect(dashboardServiceMock.getDashboardData).toHaveBeenCalled();
   });
 });

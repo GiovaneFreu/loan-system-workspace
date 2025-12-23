@@ -9,9 +9,19 @@
       "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
       "options": {
         "jestConfig": "apps/backend-e2e/jest.config.ts",
-        "passWithNoTests": true
+        "passWithNoTests": false
       },
-      "dependsOn": ["backend:build", "backend:serve"]
+      "configurations": {
+        "e2e": {}
+      },
+      "dependsOn": [
+        "backend:build",
+        {
+          "target": "serve",
+          "projects": ["backend"],
+          "params": "forward"
+        }
+      ]
     }
   }
 }

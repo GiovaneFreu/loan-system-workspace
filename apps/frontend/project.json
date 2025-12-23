@@ -56,12 +56,21 @@
         "production": {
           "buildTarget": "frontend:build:production"
         },
+        "e2e": {
+          "buildTarget": "frontend:build:development"
+        },
         "development": {
           "buildTarget": "frontend:build:development"
         }
       },
       "defaultConfiguration": "development",
-      "dependsOn": ["backend:serve"],
+      "dependsOn": [
+        {
+          "target": "serve",
+          "projects": ["backend"],
+          "params": "ignore"
+        }
+      ],
       "options": {
         "proxyConfig": "apps/frontend/proxy.conf.json"
       }

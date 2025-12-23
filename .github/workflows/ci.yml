@@ -34,8 +34,21 @@ jobs:
       
       - name: Run unit tests
         run: |
-          npx nx test backend --coverage
-          npx nx test frontend --coverage
+          npx nx test backend --configuration=ci
+          npx nx test frontend --configuration=ci
+          npx nx test interfaces --configuration=ci
+
+      - name: Install Playwright browsers
+        if: matrix.node-env == 'development'
+        run: npx playwright install --with-deps
+
+      - name: Run e2e tests
+        if: matrix.node-env == 'development'
+        env:
+          NODE_ENV: test
+        run: |
+          npx nx e2e backend-e2e --configuration=e2e
+          npx nx e2e frontend-e2e
       
       - name: Build with NODE_ENV=${{ matrix.node-env }}
         env:
