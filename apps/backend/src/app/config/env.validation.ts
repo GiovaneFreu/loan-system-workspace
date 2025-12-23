@@ -1,4 +1,4 @@
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
@@ -10,7 +10,6 @@ import {
   ValidateIf,
   validateSync,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
 
 enum Environment {
   Development = 'development',
@@ -24,6 +23,27 @@ enum DatabaseType {
   Postgres = 'postgres',
   Sqlite = 'sqlite',
 }
+
+const parseBoolean = (value: unknown) => {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+  if (['true', '1', 'yes', 'y', 'on'].includes(normalized)) {
+    return true;
+  }
+
+  if (['false', '0', 'no', 'n', 'off'].includes(normalized)) {
+    return false;
+  }
+
+  return value;
+};
 
 export class EnvironmentVariables {
   @IsEnum(Environment)
@@ -64,7 +84,7 @@ export class EnvironmentVariables {
   @IsString()
   DATABASE_NAME: string;
 
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => parseBoolean(value))
   @IsBoolean()
   @IsOptional()
   DATABASE_SSL = false;
@@ -73,7 +93,7 @@ export class EnvironmentVariables {
   @IsString()
   DATABASE_PATH?: string;
 
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => parseBoolean(value))
   @IsBoolean()
   @IsOptional()
   DATABASE_SYNCHRONIZE?: boolean;
