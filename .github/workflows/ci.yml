@@ -16,10 +16,10 @@ jobs:
         node-env: [development, staging, production]
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           cache: 'npm'
@@ -61,11 +61,8 @@ jobs:
       - name: Test environment validation
         env:
           NODE_ENV: ${{ matrix.node-env }}
-          DATABASE_HOST: test-db
-          DATABASE_PORT: 5432
-          DATABASE_USER: test
-          DATABASE_PASSWORD: test
-          DATABASE_NAME: test_db
+          DATABASE_TYPE: sqlite
+          DATABASE_PATH: ${{ runner.temp }}/loan-system/data.db
         run: |
           echo "Testing app startup with NODE_ENV=${{ matrix.node-env }}"
           timeout 10s node dist/apps/backend/main.js || EXIT_CODE=$?
@@ -81,7 +78,7 @@ jobs:
     needs: test-and-validate
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       
       - name: Build Docker image
         run: |
@@ -94,24 +91,28 @@ jobs:
         run: |
           docker run -d \
             --name test-container \
+            -p 8080:8080 \
             -e NODE_ENV=staging \
-            -e DATABASE_HOST=localhost \
-            -e DATABASE_PORT=5432 \
-            -e DATABASE_USER=test \
-            -e DATABASE_PASSWORD=test \
-            -e DATABASE_NAME=test_db \
             loan-system:test
-          
-          sleep 5
-          
-          if docker ps | grep -q test-container; then
-            echo "✅ Container started successfully"
-            docker logs test-container
+
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/api/health > /dev/null; then
+              break
+            fi
+            sleep 2
+          done
+
+          if curl -fsS http://localhost:8080/api/health; then
+            echo
+            echo "✅ Container started and the API is healthy"
           else
             echo "❌ Container failed to start"
             docker logs test-container
             exit 1
           fi
-          
+
+          # Angular deep links must be served by the backend (SPA fallback)
+          curl -fsS -o /dev/null -w "Deep link /loans/list -> HTTP %{http_code}\n" http://localhost:8080/loans/list
+
           docker stop test-container || true
           docker rm test-container || true

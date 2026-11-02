@@ -41,9 +41,19 @@ RUN addgroup -g 1001 -S nodejs && \
 
 WORKDIR /app
 
+# Runtime defaults (override with -e / Cloud Run env vars as needed)
+ENV NODE_ENV=production \
+    PORT=8080 \
+    DATABASE_TYPE=sqlite \
+    DATABASE_PATH=/var/lib/data/data.db \
+    DATABASE_SYNCHRONIZE=true
+
 # Copy production dependencies
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --omit=dev && npm cache clean --force
+
+# SQLite data directory, writable by the non-root user
+RUN mkdir -p /var/lib/data && chown -R nodejs:nodejs /var/lib/data
 
 # Copy built applications
 COPY --from=backend-build --chown=nodejs:nodejs /app/dist/apps/backend ./dist/apps/backend
