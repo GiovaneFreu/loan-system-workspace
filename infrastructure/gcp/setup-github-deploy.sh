@@ -30,6 +30,10 @@ gcloud artifacts repositories describe "$AR_REPO" --location "$REGION" --project
   gcloud artifacts repositories create "$AR_REPO" --repository-format=docker \
     --location "$REGION" --project "$PROJECT_ID"
 
+# Keep image storage small: delete images older than 7 days, always keeping the 3 most recent
+gcloud artifacts repositories set-cleanup-policies "$AR_REPO" --location "$REGION" --project "$PROJECT_ID" \
+  --policy="$(dirname "$0")/artifact-cleanup-policy.json" --no-dry-run --quiet >/dev/null
+
 # Deployer service account with the minimum roles it needs
 gcloud iam service-accounts describe "$SA_EMAIL" --project "$PROJECT_ID" >/dev/null 2>&1 ||
   gcloud iam service-accounts create "$SA_NAME" --display-name="GitHub Actions deployer" --project "$PROJECT_ID"
