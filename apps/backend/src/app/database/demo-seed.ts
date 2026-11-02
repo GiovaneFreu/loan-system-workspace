@@ -26,11 +26,11 @@ export async function seedDemoData(dataSource: DataSource): Promise<void> {
 
   const clients = await clientRepository.save(
     clientRepository.create([
-      { name: 'Ana Paula Ribeiro', birthDate: new Date('1988-04-17'), cpf_cnpj: '12345678143', monthlyIncome: 8500 },
-      { name: 'Bruno Carvalho Lima', birthDate: new Date('1979-11-02'), cpf_cnpj: '98765432029', monthlyIncome: 12400 },
-      { name: 'Carla Mendes Duarte', birthDate: new Date('1993-07-25'), cpf_cnpj: '24681357928', monthlyIncome: 6200 },
-      { name: 'Diego Ferraz Nogueira', birthDate: new Date('1985-01-30'), cpf_cnpj: '13579246828', monthlyIncome: 15800 },
-      { name: 'Agro Vale Comércio de Grãos Ltda', birthDate: new Date('2009-03-10'), cpf_cnpj: '11222333000181', monthlyIncome: 185000 },
+      { name: 'Ana Paula Ribeiro', birthDate: new Date(1988, 3, 17), cpf_cnpj: '12345678143', monthlyIncome: 8500 },
+      { name: 'Bruno Carvalho Lima', birthDate: new Date(1979, 10, 2), cpf_cnpj: '98765432029', monthlyIncome: 12400 },
+      { name: 'Carla Mendes Duarte', birthDate: new Date(1993, 6, 25), cpf_cnpj: '24681357928', monthlyIncome: 6200 },
+      { name: 'Diego Ferraz Nogueira', birthDate: new Date(1985, 0, 30), cpf_cnpj: '13579246828', monthlyIncome: 15800 },
+      { name: 'Agro Vale Comércio de Grãos Ltda', birthDate: new Date(2009, 2, 10), cpf_cnpj: '11222333000181', monthlyIncome: 185000 },
     ])
   );
 
