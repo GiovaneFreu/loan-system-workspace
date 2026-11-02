@@ -9,7 +9,7 @@ on:
 jobs:
   test-and-validate:
     name: Test and Validate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     
     strategy:
       matrix:
@@ -74,7 +74,7 @@ jobs:
 
   docker-build:
     name: Docker Build Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: test-and-validate
     
     steps:
