@@ -7,6 +7,7 @@
 [![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
+[![CI](https://github.com/GiovaneFreu/loan-system-workspace/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/GiovaneFreu/loan-system-workspace/actions/workflows/ci.yml)
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Cloud%20Run-4285F4?logo=googlecloud&logoColor=white)](https://loan-system-121742301150.us-central1.run.app/)
 
 A loan management system built as an Nx monorepo with Angular and NestJS. The project emphasizes clean domain boundaries, shared contracts, and a production-ready deployment flow using a single container.
@@ -150,6 +151,11 @@ gcloud run deploy loan-system --source . \
   --min-instances 0 --max-instances 1 --memory 512Mi \
   --set-env-vars NODE_ENV=production,DEMO_SEED=true
 ```
+
+### Continuous deployment
+Every push to `main` runs the **CI Pipeline**: lint, unit tests with coverage thresholds, Playwright e2e tests, production builds and a container smoke test. When it passes, **Deploy to Cloud Run** builds `infrastructure/docker/Dockerfile.prod`, pushes the image to Artifact Registry, deploys it and checks the health endpoint.
+
+GitHub Actions authenticates to Google Cloud with Workload Identity Federation, so no service account keys are stored in the repository. The one-time setup is scripted in `infrastructure/gcp/setup-github-deploy.sh`.
 
 ## API
 - Base path: `/api`

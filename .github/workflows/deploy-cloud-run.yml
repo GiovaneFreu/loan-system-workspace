@@ -1,0 +1,87 @@
+name: Deploy to Cloud Run
+
+# Deploys the live demo after the CI Pipeline succeeds on main.
+# Authentication uses Workload Identity Federation (keyless): no service
+# account keys or secrets are stored in GitHub. See
+# infrastructure/gcp/setup-github-deploy.sh for the one-time GCP setup.
+
+on:
+  workflow_run:
+    workflows: ['CI Pipeline']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-cloud-run
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: loan-system-demo-gf
+  REGION: us-central1
+  SERVICE: loan-system
+  IMAGE: us-central1-docker.pkg.dev/loan-system-demo-gf/cloud-run-source-deploy/loan-system
+  WORKLOAD_IDENTITY_PROVIDER: projects/121742301150/locations/global/workloadIdentityPools/github/providers/github-actions
+  SERVICE_ACCOUNT: github-deployer@loan-system-demo-gf.iam.gserviceaccount.com
+
+jobs:
+  deploy:
+    name: Build and deploy
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    environment:
+      name: cloud-run-demo
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Authenticate to Google Cloud (Workload Identity Federation)
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Build and push image
+        env:
+          TAG: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+          docker build -f infrastructure/docker/Dockerfile.prod -t "${IMAGE}:${TAG}" .
+          docker push "${IMAGE}:${TAG}"
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          image: ${{ env.IMAGE }}:${{ github.event.workflow_run.head_sha || github.sha }}
+          env_vars: |-
+            NODE_ENV=production
+            DEMO_SEED=true
+          flags: >-
+            --allow-unauthenticated
+            --port=8080
+            --memory=512Mi
+            --min-instances=0
+            --max-instances=1
+
+      - name: Smoke test
+        run: |
+          curl -fsS "${{ steps.deploy.outputs.url }}/api/health"
+          echo
+          curl -fsS -o /dev/null -w "Deep link /loans/list -> HTTP %{http_code}\n" "${{ steps.deploy.outputs.url }}/loans/list"
