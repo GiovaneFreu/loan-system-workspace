@@ -65,6 +65,22 @@ async function bootstrap() {
 
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
+
+  // The static module serves index.html for any unmatched path so Angular
+  // deep links work. Unknown API paths must still answer with a JSON 404.
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addHook('preHandler', async (request, reply) => {
+      const isCatchAll = request.routeOptions.url === '*';
+      if (isCatchAll && request.url.startsWith(`/${globalPrefix}`)) {
+        reply.code(404).send({
+          message: `Cannot ${request.method} ${request.url}`,
+          error: 'Not Found',
+          statusCode: 404,
+        });
+      }
+    });
   const port = Number(process.env.PORT) || 8080;
   await app.listen(port, '0.0.0.0');
   Logger.log(

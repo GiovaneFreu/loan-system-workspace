@@ -28,6 +28,9 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     LoansModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'dist', 'apps', 'frontend', 'browser'),
+      // Serve index.html for client-side routes (e.g. /loans/list) so deep
+      // links and page refreshes work with the Fastify adapter.
+      serveStaticOptions: { fallthrough: true },
     }),
   ],
   controllers: [],
