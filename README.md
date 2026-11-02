@@ -7,7 +7,7 @@
 [![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Koyeb-0ea5e9)](https://annoyed-magdaia-gfservicos-2b87a1c1.koyeb.app/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Cloud%20Run-4285F4?logo=googlecloud&logoColor=white)](https://loan-system-121742301150.us-central1.run.app/)
 
 A loan management system built as an Nx monorepo with Angular and NestJS. The project emphasizes clean domain boundaries, shared contracts, and a production-ready deployment flow using a single container.
 
@@ -20,7 +20,9 @@ A loan management system built as an Nx monorepo with Angular and NestJS. The pr
 - Multi-stage Docker build, frontend served by backend in production
 
 ## Live Demo
-- https://annoyed-magdaia-gfservicos-2b87a1c1.koyeb.app/
+- https://loan-system-121742301150.us-central1.run.app/
+
+The demo runs on Google Cloud Run and scales to zero when idle, so the first request after a pause can take a few seconds. It uses an in-container SQLite database seeded with fictitious data (`DEMO_SEED=true`), which resets whenever the service restarts.
 
 ## Tech Stack
 - **Frontend**: Angular 21, RxJS, Tailwind CSS
@@ -48,9 +50,9 @@ flowchart LR
   subgraph Browser
     UI[Angular Frontend]
   end
-  subgraph Koyeb["Koyeb (Production)"]
+  subgraph CloudRun["Google Cloud Run (Demo)"]
     APP[NestJS API\n+ Angular Static]
-    VOL[(Persistent Volume\n/var/lib/data)]
+    VOL[(SQLite\nin-container, seeded)]
   end
   subgraph Data
     PG[(PostgreSQL\nDevelopment)]
@@ -69,16 +71,17 @@ flowchart LR
 ## Environment Configuration
 Environment files are loaded from `infrastructure/environments/.env.<NODE_ENV>` and `infrastructure/environments/.env`. These files are gitignored. Use `infrastructure/environments/.env.example` as a template.
 
-### Production (Koyeb / SQLite)
+### Production (SQLite)
 ```
 NODE_ENV=production
 PORT=8080
 DATABASE_TYPE=sqlite
 DATABASE_PATH=/var/lib/data/data.db
 DATABASE_SYNCHRONIZE=true
+DEMO_SEED=true   # optional: seeds fictitious data when the database is empty
 ```
 
-Attach a persistent volume to `/var/lib/data`. Use `DATABASE_SYNCHRONIZE=true` only for the initial deployment.
+For persistent data, mount a volume at `/var/lib/data` or switch to PostgreSQL. Use `DATABASE_SYNCHRONIZE=true` only for the initial deployment.
 
 ### Development (PostgreSQL via Docker)
 ```
@@ -124,7 +127,7 @@ npx nx build backend
 npx nx run-many -t build
 ```
 
-## Deployment (Docker / Koyeb)
+## Deployment (Docker / Google Cloud Run)
 1. Build the image:
 ```bash
 docker build -t loan-system .
@@ -140,7 +143,13 @@ docker run -p 8080:8080 \
   loan-system
 ```
 
-3. On Koyeb, set the same environment variables and attach a volume to `/var/lib/data`.
+3. Deploy to Cloud Run from source (Cloud Build builds the root `Dockerfile`):
+```bash
+gcloud run deploy loan-system --source . \
+  --region us-central1 --allow-unauthenticated \
+  --min-instances 0 --max-instances 1 --memory 512Mi \
+  --set-env-vars NODE_ENV=production,DEMO_SEED=true
+```
 
 ## API
 - Base path: `/api`
