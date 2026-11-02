@@ -5,6 +5,7 @@ import { join, dirname } from 'path';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { Client } from '../modules/clients/entities/client.entity';
 import { Loan } from '../modules/loans/entities/loan.entity';
+import { seedDemoData } from './demo-seed';
 
 export const DATA_SOURCE = 'DATA_SOURCE';
 
@@ -60,6 +61,9 @@ export const databaseProviders = [
         try {
           await dataSource.initialize();
           console.log('Database connected successfully');
+          await seedDemoData(dataSource).catch((error) =>
+            console.error('Demo seed failed:', error.message)
+          );
           return dataSource;
         } catch (error) {
           console.error(`Database connection attempt ${attempt}/${maxRetries} failed:`, error.message);
